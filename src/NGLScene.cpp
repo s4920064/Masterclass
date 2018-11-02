@@ -1,4 +1,5 @@
 #include "NGLScene.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <ngl/NGLInit.h>
 #include <ngl/NGLStream.h>
 #include <ngl/ShaderLib.h>
@@ -26,7 +27,6 @@ void NGLScene::resizeGL( int _w, int _h )
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
-constexpr auto shaderProgram = "PBR";
 const static int TEXTURE_WIDTH=1024;
 const static int TEXTURE_HEIGHT=1024;
 
@@ -40,33 +40,54 @@ void NGLScene::initializeGL()
   glClearColor( 0.4f, 0.4f, 0.4f, 1.0f ); // Grey Background
   // enable depth testing for drawing
   glEnable( GL_DEPTH_TEST );
-  // enable multisampling for smoother drawing
-  glEnable( GL_MULTISAMPLE );
+
+  // ha no not yet
+//  // enable multisampling for smoother drawing
+//  glEnable( GL_MULTISAMPLE );
+
   // now to load the shader and set the values
   // grab an instance of shader manager
   ngl::ShaderLib* shader = ngl::ShaderLib::instance();
-  // we are creating a shader called PBR to save typos
-  // in the code create some constexpr
-  constexpr auto vertexShader  = "PBRVertex";
-  constexpr auto fragShader    = "PBRFragment";
+
   // create the shader program
-  shader->createShaderProgram( shaderProgram );
+  shader->createShaderProgram( "PBR" );
   // now we are going to create empty shaders for Frag and Vert
-  shader->attachShader( vertexShader, ngl::ShaderType::VERTEX );
-  shader->attachShader( fragShader, ngl::ShaderType::FRAGMENT );
+  shader->attachShader( "PBRVertex", ngl::ShaderType::VERTEX );
+  shader->attachShader( "PBRFragment", ngl::ShaderType::FRAGMENT );
   // attach the source
-  shader->loadShaderSource( vertexShader, "shaders/PBRVertex.glsl" );
-  shader->loadShaderSource( fragShader, "shaders/PBRFragment.glsl" );
+  shader->loadShaderSource( "PBRVertex", "shaders/PBRVertex.glsl" );
+  shader->loadShaderSource( "PBRFragment", "shaders/PBRFragment.glsl" );
   // compile the shaders
-  shader->compileShader( vertexShader );
-  shader->compileShader( fragShader );
+  shader->compileShader( "PBRVertex" );
+  shader->compileShader( "PBRFragment" );
   // add them to the program
-  shader->attachShaderToProgram( shaderProgram, vertexShader );
-  shader->attachShaderToProgram( shaderProgram, fragShader );
+  shader->attachShaderToProgram( "PBR", "PBRVertex" );
+  shader->attachShaderToProgram( "PBR", "PBRFragment" );
   // now we have associated that data we can link the shader
-  shader->linkProgramObject( shaderProgram );
-  // and make it active ready to load values
-  ( *shader )[ shaderProgram ]->use();
+  shader->linkProgramObject( "PBR" );
+
+  // create the shader program
+  shader->createShaderProgram( "TAA" );
+  // now we are going to create empty shaders for Frag and Vert
+  shader->attachShader( "TAAVertex", ngl::ShaderType::VERTEX );
+  shader->attachShader( "TAAFragment", ngl::ShaderType::FRAGMENT );
+  // attach the source
+  shader->loadShaderSource( "TAAVertex", "shaders/TAAVertex.glsl" );
+  shader->loadShaderSource( "TAAFragment", "shaders/TAAFragment.glsl" );
+  // compile the shaders
+  shader->compileShader( "TAAVertex" );
+  shader->compileShader( "TAAFragment" );
+  // add them to the program
+  shader->attachShaderToProgram( "TAA", "TAAVertex" );
+  shader->attachShaderToProgram( "TAA", "TAAFragment" );
+  // now we have associated that data we can link the shader
+  shader->linkProgramObject( "TAA" );
+
+  // Create a screen oriented plane
+  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
+  prim->createTrianglePlane("plane",2,2,1,1,ngl::Vec3(0,1,0));
+
+  ( *shader )[ "PBR" ]->use();
  // We now create our view matrix for a static camera
   ngl::Vec3 from( 0.0f, 2.0f, 2.0f );
   ngl::Vec3 to( 0.0f, 0.0f, 0.0f );
@@ -87,7 +108,7 @@ void NGLScene::initializeGL()
   shader->setUniform("roughness",0.38f);
   shader->setUniform("ao",0.2f);
   ngl::VAOPrimitives::instance()->createTrianglePlane("floor",20,20,1,1,ngl::Vec3::up());
-  shader->printRegisteredUniforms(shaderProgram);
+  shader->printRegisteredUniforms("PBR");
   shader->use(ngl::nglCheckerShader);
   shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
   shader->setUniform("checkOn",true);
@@ -105,7 +126,7 @@ void NGLScene::createTextureObject()
   // create a texture object
   glGenTextures(1, &m_texture_CurrentFrameID);
   // bind it to make it active
-  glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, m_texture_CurrentFrameID);
   // set params
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -121,7 +142,7 @@ void NGLScene::createTextureObject()
   // create a texture object
   glGenTextures(1, &m_texture_PreviousFrameID);
   // bind it to make it active
-  glActiveTexture(GL_TEXTURE1);
+  glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D, m_texture_PreviousFrameID);
   // set params
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -202,8 +223,13 @@ void NGLScene::paintGL()
   // if we want a different camera we would set this here
   glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-  //------------------Draw Geometry---------------------
+  //----------------------------------------------------------------------------------------------------------------------
+  // now we are going to draw to the normal GL buffer and use the texture created
+  // in the previous render to draw to our objects
+  //----------------------------------------------------------------------------------------------------------------------
+  //shader->use("PBR");
 
+  //-------------------------Draw Geometry------------------------------
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["Phong"]->use();
@@ -242,39 +268,47 @@ void NGLScene::paintGL()
   //draw
   loadMatricesToShader();
   prim->draw("teapot");
-
-  //-----------------------------------------------------
-
-  //----------------------------------------------------------------------------------------------------------------------
-  // now we are going to draw to the normal GL buffer and use the texture created
-  // in the previous render to draw to our objects
-  //----------------------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------
 
   // first bind the normal render buffer
   glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 
   // do any mipmap generation
-  glGenerateMipmap(GL_TEXTURE_2D);
+  //glGenerateMipmap(GL_TEXTURE_2D);
+
   // set the screen for a different clear colour
   glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
   // clear this screen
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // now enable the textures we just rendered to
-  glActiveTexture(GL_TEXTURE0)
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, m_texture_CurrentFrameID);
 
-  glActiveTexture(GL_TEXTURE1)
+  glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, m_texture_PreviousFrameID);
 
-  shader->use();
+  // get the new shader and set the new viewport size
+  (*shader)["TAA"]->use();
+  GLuint pid = shader->getProgramID("TAA");
 
-//  // get the new shader and set the new viewport size
-//  shader->use("TextureShader");
+  // send all the textures to the GPU
+  glUniform1i(glGetUniformLocation(pid, "CurrentFrameTex"), 1);
+  glUniform1i(glGetUniformLocation(pid, "PreviousFrameTex"), 2);
+  glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
   // this takes into account retina displays etc
   glViewport(0, 0, static_cast<GLsizei>(width() * devicePixelRatio()), static_cast<GLsizei>(height() * devicePixelRatio()));
 
+  // set the MVP for the plane
+  glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
+  glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
+
+  // draw the plane
+  prim->draw("plane");
+
+  // bind the plane texture
+  glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
