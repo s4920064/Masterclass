@@ -118,6 +118,7 @@ void main()
     color = color / (color + vec3(1.0));
     // gamma correct
     color = pow(color, vec3(1.0/exposure));
+    vec3 colortest = vec3(0.5,1.0,0.5);
 
     fragColour = vec4(color, 1.0);
 }
