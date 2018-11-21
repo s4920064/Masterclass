@@ -112,105 +112,101 @@ void NGLScene::initializeGL()
 
 void NGLScene::createTextureObject()
 {
-  // First delete the FBO if it has been created previously
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
-  if (glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE) {
-      glDeleteTextures(1, &m_fboCurrentTexId);
-      glDeleteTextures(1, &m_fboCurrentDepthId);
-      glDeleteFramebuffers(1, &m_fboId);
+   // First delete the FBO if it has been created previously
+  for(int i=0;i<2;i++)
+  {
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[i]);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE)
+    {
+        glDeleteTextures(1, &m_fboTexId[i]);
+        glDeleteTextures(1, &m_fboDepthId[i]);
+        glDeleteFramebuffers(1, &m_fboId[i]);
+    }
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  //------------Current Frame Texture Buffer-------------
-  // create a texture object
-  glGenTextures(1, &m_fboCurrentTexId);
-  // bind it to make it active
-  glActiveTexture(GL_TEXTURE5);
-  glBindTexture(GL_TEXTURE_2D, m_fboCurrentTexId);
-  // set params
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glGenerateMipmapEXT(GL_TEXTURE_2D);
-  // set the data size but just set the buffer to 0 as we will fill it with the FBO
-  glTexImage2D(GL_TEXTURE_2D,
-               0,
-               GL_RGBA,
-               TEXTURE_WIDTH,
-               TEXTURE_HEIGHT,
-               0,
-               GL_RGBA,
-               GL_UNSIGNED_BYTE,
-               NULL);
-  // now turn the texture off for now
-  glBindTexture(GL_TEXTURE_2D, 0);
-  //-----------------------------------------------------
+  // Create texture attachments
+  for(int i=0;i<2;i++)
+  {
+    //-------------Color Texture Attachments------------
+    // create a texture object
+    glGenTextures(1, &m_fboTexId[i]);
+    // bind it to make it active
 
-  //------------Current Frame Depth Texture Buffer-------------
-  // create a texture object
-  glGenTextures(1, &m_fboCurrentDepthId);
-  // bind it to make it active
-  glActiveTexture(GL_TEXTURE7);
-  glBindTexture(GL_TEXTURE_2D, m_fboCurrentDepthId);
-  // set params
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glGenerateMipmapEXT(GL_TEXTURE_2D);
-  // set the data size but just set the buffer to 0 as we will fill it with the FBO
-  glTexImage2D(GL_TEXTURE_2D,
-               0,
-               GL_DEPTH_COMPONENT,
-               TEXTURE_WIDTH,
-               TEXTURE_HEIGHT,
-               0,
-               GL_DEPTH_COMPONENT,
-               GL_UNSIGNED_BYTE,
-               0);
-  // now turn the texture off for now
-  glBindTexture(GL_TEXTURE_2D, 0);
-  //-----------------------------------------------------
+    glActiveTexture(GL_TEXTURE5+i);
+    glBindTexture(GL_TEXTURE_2D, m_fboTexId[i]);
+    // set params
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glGenerateMipmapEXT(GL_TEXTURE_2D);
+    // set the data size but just set the buffer to 0 as we will fill it with the FBO
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA,
+                 TEXTURE_WIDTH,
+                 TEXTURE_HEIGHT,
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 NULL);
+    // now turn the texture off for now
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //-----------------------------------------------------
 
-//  //-----------Previous Frame Texture Buffer-------------
-//  // create a texture object
-//  glGenTextures(1, &m_fboPreviousTexId);
-//  // bind it to make it active
-//  glActiveTexture(GL_TEXTURE6);
-//  glBindTexture(GL_TEXTURE_2D, m_fboPreviousTexId);
-//  // set params
-//  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//  //glGenerateMipmapEXT(GL_TEXTURE_2D);
-//  // set the data size but just set the buffer to 0 as we will fill it with the FBO
-//  glTexImage2D(GL_TEXTURE_2D,
-//               0,
-//               GL_RGBA8,
-//               TEXTURE_WIDTH,
-//               TEXTURE_HEIGHT,
-//               0,
-//               GL_RGBA,
-//               GL_UNSIGNED_BYTE,
-//               0);
-//  // now turn the texture off for now
-//  glBindTexture(GL_TEXTURE_2D, 0);
-//  //-----------------------------------------------------
+    //--------------Depth Texture Attachments--------------
+    // create a texture object
+    glGenTextures(1, &m_fboDepthId[i]);
+    // bind it to make it active
+    glActiveTexture(GL_TEXTURE7+i);
+    glBindTexture(GL_TEXTURE_2D, m_fboDepthId[i]);
+    // set params
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glGenerateMipmapEXT(GL_TEXTURE_2D);
+    // set the data size but just set the buffer to 0 as we will fill it with the FBO
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 TEXTURE_WIDTH,
+                 TEXTURE_HEIGHT,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 GL_UNSIGNED_BYTE,
+                 0);
+    // now turn the texture off for now
+    glBindTexture(GL_TEXTURE_2D, 0);
+    //-----------------------------------------------------
+  }
 }
 
 void NGLScene::createFramebufferObject()
 {
-  // create a framebuffer object this is deleted in the dtor
-  glGenFramebuffers(1, &m_fboId);
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+  for(int i=0;i<2;i++)
+  {
+    // create framebuffer objects, these are deleted in the dtor
+    glGenFramebuffers(1, &m_fboId[i]);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[i]);
 
-  // attatch the textures we created earlier to the FBO
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboCurrentTexId, 0);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_fboCurrentDepthId, 0);
-  //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboPreviousTexId, 0);
+    // attatch the textures we created earlier to the FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTexId[i], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_fboDepthId[i], 0);
 
-  // Set the fragment shader output targets (DEPTH_ATTACHMENT is done automatically)
-  GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
-  glDrawBuffers(1, drawBufs);
+    // Set the fragment shader output targets (DEPTH_ATTACHMENT is done automatically)
+    //GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
+    //glDrawBuffers(1, drawBufs);
 
-  // now got back to the default render context
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // now got back to the default render context
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    printf("%d Loop\n", i);
+
+    //We can  check  FBO  attachment  success  using  this  command!
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) ==
+    GL_FRAMEBUFFER_COMPLETE  || !m_fboDepthId[i]  || !m_fboTexId[i])
+    {
+      printf("Framebuffer %d OK\n", i);
+    }
+  }
 }
 
 void NGLScene::loadMatricesToShader()
@@ -241,29 +237,23 @@ void NGLScene::loadMatricesToShader()
 
 void NGLScene::paintGL()
 {
-  //----------------------------------------------------------------
-  // draw to our FBO first
-  //----------------------------------------------------------------
-
   createTextureObject();
   createFramebufferObject();
 
-  // we are now going to draw to our FBO
   // set the rendering destination to FBO
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[m_currentId]);
+
   // set the background colour (using blue to show it up)
   glClearColor(0,0.4f,0.5f,1);
+
+  // clear the current rendering target
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   // set our viewport to the size of the texture
   // if we want a different camera we would set this here
   glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-  //----------------------------------------------------------------------------------------------------------------------
-  // now we are going to draw to the normal GL buffer and use the texture created
-  // in the previous render to draw to our objects
-  //----------------------------------------------------------------------------------------------------------------------
-  //shader->use("PBR");
-
+  // draw to the current rendering target
   //-------------------------Draw Geometry------------------------------
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -285,6 +275,7 @@ void NGLScene::paintGL()
   // get the VBO instance and draw the built in teapot
   ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
 
+  // send matrices to shader
   shader->use(ngl::nglCheckerShader);
   ngl::Mat4 tx;
   tx.translate(0.0f,-0.45f,0.0f);
@@ -293,21 +284,38 @@ void NGLScene::paintGL()
   normalMatrix.inverse().transpose();
   shader->setUniform("MVP",MVP);
   shader->setUniform("normalMatrix",normalMatrix);
+
+  // send light information to shader
   if(m_transformLight)
   {
     shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
-
   }
 
+  // draw objects:
+  // floor
   prim->draw("floor");
-
-  //draw
+  // teapot
   loadMatricesToShader();
   prim->draw("teapot");
   //--------------------------------------------------------------------
 
+  // enable the textures:
+  // the previous and current textures
+  glActiveTexture(GL_TEXTURE5);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[0]);
+
+  glActiveTexture(GL_TEXTURE6);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[1]);
+
+  // the depth textures
+//  glActiveTexture(GL_TEXTURE7);
+//  glBindTexture(GL_TEXTURE_2D, m_fboDepthId[0]);
+
+//  glActiveTexture(GL_TEXTURE8);
+//  glBindTexture(GL_TEXTURE_2D, m_fboDepthId[1]);
+
   // first bind the normal render buffer
-  //glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
+//  glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // do any mipmap generation
@@ -319,29 +327,22 @@ void NGLScene::paintGL()
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glViewport(0,0,TEXTURE_WIDTH,TEXTURE_HEIGHT);
 
-  // now enable the textures we just rendered to
-  glActiveTexture(GL_TEXTURE5);
-  glBindTexture(GL_TEXTURE_2D, m_fboCurrentTexId);
-
-//  glActiveTexture(GL_TEXTURE7);
-//  glBindTexture(GL_TEXTURE_2D, m_fboPreviousTexId);
-
-  glActiveTexture(GL_TEXTURE6);
-  glBindTexture(GL_TEXTURE_2D, m_fboCurrentDepthId);
-
-  // get the new shader and set the new viewport size
+  // use the TAA shader to draw the screen-oriented plane (the final image)
   (*shader)["TAA"]->use();
   GLuint pid = shader->getProgramID("TAA");
 
-  // send all the textures to the GPU
-  glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), 5);
-  //glUniform1i(glGetUniformLocation(pid, "PreviousFrameTex"), 6);
+  // send all the textures to the TAA shader
+  glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), m_currentId+5);
+  glUniform1i(glGetUniformLocation(pid, "previousFrameTex"), (1-m_currentId)+5);
   glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
   // this takes into account retina displays etc
-  glViewport(0, 0, static_cast<GLsizei>(width() * devicePixelRatio()), static_cast<GLsizei>(height() * devicePixelRatio()));
+  glViewport(0,
+             0,
+             static_cast<GLsizei>(width() * devicePixelRatio()),
+             static_cast<GLsizei>(height() * devicePixelRatio()));
 
-  // set the MVP for the plane
+  // set the MVP for the screen-oriented plane
   glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
   glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
 
@@ -350,6 +351,10 @@ void NGLScene::paintGL()
 
   // bind the plane texture
   glBindTexture(GL_TEXTURE_2D, 0);
+
+  // switch the current texture id
+  m_currentId = 1-m_currentId;
+  printf("%d\n",m_currentId);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
