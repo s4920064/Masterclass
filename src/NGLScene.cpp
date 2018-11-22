@@ -43,7 +43,6 @@ void NGLScene::initializeGL()
   // enable depth testing for drawing
   glEnable( GL_DEPTH_TEST );
 
-  // ha no not yet
 //  // enable multisampling for smoother drawing
 //  glEnable( GL_MULTISAMPLE );
 
@@ -108,11 +107,86 @@ void NGLScene::initializeGL()
   shader->setUniform("checkSize",60.0f);
   shader->printRegisteredUniforms(ngl::nglCheckerShader);
 
+  // create the fbos and their texture attach
+  createTextureObject();
+  createFramebufferObject();
+}
+
+void NGLScene::loadMatricesToShader()
+{
+  ngl::ShaderLib* shader = ngl::ShaderLib::instance();
+  shader->use("PBR");
+  struct transform
+  {
+    ngl::Mat4 MVP;
+    ngl::Mat4 normalMatrix;
+    ngl::Mat4 M;
+  };
+
+   transform t;
+   t.M=m_view*m_mouseGlobalTX;
+
+   t.MVP=m_projection*t.M;
+   t.normalMatrix=t.M;
+   t.normalMatrix.inverse().transpose();
+   shader->setUniformBuffer("TransformUBO",sizeof(transform),&t.MVP.m_00);
+
+   if(m_transformLight)
+   {
+     shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
+
+   }
+}
+
+void NGLScene::drawSceneGeometry()
+{
+  // grab an instance of the shader manager
+  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
+  (*shader)["PBR"]->use();
+
+  // Rotation based on the mouse position for our global transform
+  ngl::Mat4 rotX;
+  ngl::Mat4 rotY;
+  // create the rotation matrices
+  rotX.rotateX( m_win.spinXFace );
+  rotY.rotateY( m_win.spinYFace );
+  // multiply the rotations
+  m_mouseGlobalTX = rotX * rotY;
+  // add the translations
+  m_mouseGlobalTX.m_m[ 3 ][ 0 ] = m_modelPos.m_x;
+  m_mouseGlobalTX.m_m[ 3 ][ 1 ] = m_modelPos.m_y;
+  m_mouseGlobalTX.m_m[ 3 ][ 2 ] = m_modelPos.m_z;
+
+  // get the VBO instance and draw the built in teapot
+  ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
+
+  // send matrices to shader
+  shader->use(ngl::nglCheckerShader);
+  ngl::Mat4 tx;
+  tx.translate(0.0f,-0.45f,0.0f);
+  ngl::Mat4 MVP=m_projection*m_view*m_mouseGlobalTX*tx;
+  ngl::Mat3 normalMatrix=m_view*m_mouseGlobalTX;
+  normalMatrix.inverse().transpose();
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
+
+  // send light information to shader
+  if(m_transformLight)
+  {
+    shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
+  }
+
+  // draw objects:
+  // floor
+  prim->draw("floor");
+  // teapot
+  loadMatricesToShader();
+  prim->draw("teapot");
 }
 
 void NGLScene::createTextureObject()
 {
-   // First delete the FBO if it has been created previously
+   // first delete any fbos and texture attachments if it has been created previously
   for(int i=0;i<2;i++)
   {
     glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[i]);
@@ -125,7 +199,7 @@ void NGLScene::createTextureObject()
   }
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  // Create texture attachments
+  // create two of each texture attachments (color and depth)
   for(int i=0;i<2;i++)
   {
     //-------------Color Texture Attachments------------
@@ -181,6 +255,8 @@ void NGLScene::createTextureObject()
 
 void NGLScene::createFramebufferObject()
 {
+  // make two fbos: fbo[0] and fbo[1]
+  // fbo[0] has attachments fboTexId[0] and fboDepthId[0], and vice versa for fbo[1]...
   for(int i=0;i<2;i++)
   {
     // create framebuffer objects, these are deleted in the dtor
@@ -198,9 +274,7 @@ void NGLScene::createFramebufferObject()
     // now got back to the default render context
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    printf("%d Loop\n", i);
-
-    //We can  check  FBO  attachment  success  using  this  command!
+    // check FBO attachment success
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) ==
     GL_FRAMEBUFFER_COMPLETE  || !m_fboDepthId[i]  || !m_fboTexId[i])
     {
@@ -209,152 +283,60 @@ void NGLScene::createFramebufferObject()
   }
 }
 
-void NGLScene::loadMatricesToShader()
-{
-  ngl::ShaderLib* shader = ngl::ShaderLib::instance();
-  shader->use("PBR");
-  struct transform
-  {
-    ngl::Mat4 MVP;
-    ngl::Mat4 normalMatrix;
-    ngl::Mat4 M;
-  };
-
-   transform t;
-   t.M=m_view*m_mouseGlobalTX;
-
-   t.MVP=m_projection*t.M;
-   t.normalMatrix=t.M;
-   t.normalMatrix.inverse().transpose();
-   shader->setUniformBuffer("TransformUBO",sizeof(transform),&t.MVP.m_00);
-
-   if(m_transformLight)
-   {
-     shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
-
-   }
-}
-
 void NGLScene::paintGL()
 {
-  createTextureObject();
-  createFramebufferObject();
-
-  // set the rendering destination to FBO
+  // set the current rendering target to the "current" fbo
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[m_currentId]);
 
-  // set the background colour (using blue to show it up)
-  glClearColor(0,0.4f,0.5f,1);
-
   // clear the current rendering target
+  glClearColor(0,0.2f,0.8f,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // set our viewport to the size of the texture
-  // if we want a different camera we would set this here
   glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
-  // draw to the current rendering target
-  //-------------------------Draw Geometry------------------------------
-  // grab an instance of the shader manager
+  // draw the scene to the current rendering target
+  drawSceneGeometry();
+
+  // bind the current fbo's texture attachment to a texture slot in memory
+  // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
+  glActiveTexture(GL_TEXTURE0 + m_currentId + 5);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[m_currentId]);
+
+  // bind to the "previous" render target/fbo
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_currentId]);
+
+  // bind the previous fbo's texture attachment to a texture slot in memory
+  // (if it's fbo[0] to TEXTURE7, if it's fbo[1] TEXTURE8)
+  glActiveTexture(GL_TEXTURE0 + (1-m_currentId)+5);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[1-m_currentId]);
+
+  // bind to the default framebuffer so we can draw to the screen
+  glBindFramebuffer(GL_FRAMEBUFFER,0);
+  // clear
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // grab an instance of ngl shader manager and ngl primitives
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["PBR"]->use();
-
-  // Rotation based on the mouse position for our global transform
-  ngl::Mat4 rotX;
-  ngl::Mat4 rotY;
-  // create the rotation matrices
-  rotX.rotateX( m_win.spinXFace );
-  rotY.rotateY( m_win.spinYFace );
-  // multiply the rotations
-  m_mouseGlobalTX = rotX * rotY;
-  // add the translations
-  m_mouseGlobalTX.m_m[ 3 ][ 0 ] = m_modelPos.m_x;
-  m_mouseGlobalTX.m_m[ 3 ][ 1 ] = m_modelPos.m_y;
-  m_mouseGlobalTX.m_m[ 3 ][ 2 ] = m_modelPos.m_z;
-
-  // get the VBO instance and draw the built in teapot
   ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
 
-  // send matrices to shader
-  shader->use(ngl::nglCheckerShader);
-  ngl::Mat4 tx;
-  tx.translate(0.0f,-0.45f,0.0f);
-  ngl::Mat4 MVP=m_projection*m_view*m_mouseGlobalTX*tx;
-  ngl::Mat3 normalMatrix=m_view*m_mouseGlobalTX;
-  normalMatrix.inverse().transpose();
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("normalMatrix",normalMatrix);
-
-  // send light information to shader
-  if(m_transformLight)
-  {
-    shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
-  }
-
-  // draw objects:
-  // floor
-  prim->draw("floor");
-  // teapot
-  loadMatricesToShader();
-  prim->draw("teapot");
-  //--------------------------------------------------------------------
-
-  // enable the textures:
-  // the previous and current textures
-  glActiveTexture(GL_TEXTURE5);
-  glBindTexture(GL_TEXTURE_2D, m_fboTexId[0]);
-
-  glActiveTexture(GL_TEXTURE6);
-  glBindTexture(GL_TEXTURE_2D, m_fboTexId[1]);
-
-  // the depth textures
-//  glActiveTexture(GL_TEXTURE7);
-//  glBindTexture(GL_TEXTURE_2D, m_fboDepthId[0]);
-
-//  glActiveTexture(GL_TEXTURE8);
-//  glBindTexture(GL_TEXTURE_2D, m_fboDepthId[1]);
-
-  // first bind the normal render buffer
-//  glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-  // do any mipmap generation
-  //glGenerateMipmap(GL_TEXTURE_2D);
-
-  // set the screen for a different clear colour
-  glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
-  // clear this screen
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glViewport(0,0,TEXTURE_WIDTH,TEXTURE_HEIGHT);
-
-  // use the TAA shader to draw the screen-oriented plane (the final image)
+  // use the TAA shader to draw our image onto the screen-oriented plane
   (*shader)["TAA"]->use();
   GLuint pid = shader->getProgramID("TAA");
 
-  // send all the textures to the TAA shader
+  // send the uniforms to the TAA shader
+  // textures
   glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), m_currentId+5);
   glUniform1i(glGetUniformLocation(pid, "previousFrameTex"), (1-m_currentId)+5);
+  // window size
   glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
-  // this takes into account retina displays etc
-  glViewport(0,
-             0,
-             static_cast<GLsizei>(width() * devicePixelRatio()),
-             static_cast<GLsizei>(height() * devicePixelRatio()));
-
-  // set the MVP for the screen-oriented plane
+  // the plane MVP
   glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
   glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
 
-  // draw the plane
+  // draw the screen-oriented plane (the final image)
   prim->draw("plane");
 
-  // bind the plane texture
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  // switch the current texture id
+  // switch the "current" id (from 0 -> 1, or from 1 -> 0)
   m_currentId = 1-m_currentId;
-  printf("%d\n",m_currentId);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
