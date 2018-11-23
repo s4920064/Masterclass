@@ -67,10 +67,15 @@ void NGLScene::initializeGL()
   // now we have associated that data we can link the shader
   shader->linkProgramObject( "PBR" );
 
-  // create the shader program
+  // create the TAA shader program
   shader->loadShader("TAA",                // Name of program
                      "shaders/TAAVertex.glsl",     // Vertex shader
                      "shaders/TAAFragment.glsl");    // Fragment shader
+
+  // create a simple shader program to pass textures
+  shader->loadShader("Texture",                // Name of program
+                     "shaders/TextureVertex.glsl",     // Vertex shader
+                     "shaders/TextureFragment.glsl");    // Fragment shader
 
   // Create a screen oriented plane
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
@@ -123,19 +128,18 @@ void NGLScene::loadMatricesToShader()
     ngl::Mat4 M;
   };
 
-   transform t;
-   t.M=m_view*m_mouseGlobalTX;
+  transform t;
+  t.M=m_view*m_mouseGlobalTX;
 
-   t.MVP=m_projection*t.M;
-   t.normalMatrix=t.M;
-   t.normalMatrix.inverse().transpose();
-   shader->setUniformBuffer("TransformUBO",sizeof(transform),&t.MVP.m_00);
+  t.MVP=m_projection*t.M;
+  t.normalMatrix=t.M;
+  t.normalMatrix.inverse().transpose();
+  shader->setUniformBuffer("TransformUBO",sizeof(transform),&t.MVP.m_00);
 
-   if(m_transformLight)
-   {
-     shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
-
-   }
+  if(m_transformLight)
+  {
+    shader->setUniform("lightPosition",(m_mouseGlobalTX*m_lightPos).toVec3());
+  }
 }
 
 void NGLScene::drawSceneGeometry()
@@ -184,6 +188,19 @@ void NGLScene::drawSceneGeometry()
   prim->draw("teapot");
 }
 
+void NGLScene::drawScreenOrientedPlane(GLuint pid)
+{
+  // grab an instance of ngl VAO primitives
+  ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
+
+  // the plane MVP
+  glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
+  glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
+
+  // draw the screen-oriented plane (the final image)
+  prim->draw("plane");
+}
+
 void NGLScene::createTextureObject()
 {
    // first delete any fbos and texture attachments if it has been created previously
@@ -200,7 +217,7 @@ void NGLScene::createTextureObject()
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // create two of each texture attachments (color and depth)
-  for(int i=0;i<2;i++)
+  for(int i=0;i<3;i++)
   {
     //-------------Color Texture Attachments------------
     // create a texture object
@@ -257,7 +274,7 @@ void NGLScene::createFramebufferObject()
 {
   // make two fbos: fbo[0] and fbo[1]
   // fbo[0] has attachments fboTexId[0] and fboDepthId[0], and vice versa for fbo[1]...
-  for(int i=0;i<2;i++)
+  for(int i=0;i<3;i++)
   {
     // create framebuffer objects, these are deleted in the dtor
     glGenFramebuffers(1, &m_fboId[i]);
@@ -267,9 +284,9 @@ void NGLScene::createFramebufferObject()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fboTexId[i], 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_fboDepthId[i], 0);
 
-    // Set the fragment shader output targets (DEPTH_ATTACHMENT is done automatically)
-    //GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
-    //glDrawBuffers(1, drawBufs);
+    //Set the fragment shader output targets (DEPTH_ATTACHMENT is done automatically)
+    GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, drawBufs);
 
     // now got back to the default render context
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -285,8 +302,13 @@ void NGLScene::createFramebufferObject()
 
 void NGLScene::paintGL()
 {
-  // set the current rendering target to the "current" fbo
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[m_currentId]);
+  // update the image
+  update();
+
+  //------------------CurrentFrame FBO-------------------
+
+  // set the rendering target to the "current frame" fbo
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]);
 
   // clear the current rendering target
   glClearColor(0,0.2f,0.8f,1);
@@ -298,25 +320,29 @@ void NGLScene::paintGL()
 
   // bind the current fbo's texture attachment to a texture slot in memory
   // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
-  glActiveTexture(GL_TEXTURE0 + m_currentId + 5);
-  glBindTexture(GL_TEXTURE_2D, m_fboTexId[m_currentId]);
+  glActiveTexture(GL_TEXTURE9);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[2]);
 
-  // bind to the "previous" render target/fbo
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_currentId]);
+  //-----------------PreviousHistory FBO-----------------
 
-  // bind the previous fbo's texture attachment to a texture slot in memory
+  // bind to the "previous history" fbo
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_targetId]);
+
+  // bind the accumulation fbo's texture attachment to a texture slot in memory
   // (if it's fbo[0] to TEXTURE7, if it's fbo[1] TEXTURE8)
-  glActiveTexture(GL_TEXTURE0 + (1-m_currentId)+5);
-  glBindTexture(GL_TEXTURE_2D, m_fboTexId[1-m_currentId]);
+  glActiveTexture(GL_TEXTURE0 + (1-m_targetId)+5);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[1-m_targetId]);
 
-  // bind to the default framebuffer so we can draw to the screen
-  glBindFramebuffer(GL_FRAMEBUFFER,0);
+  //-------------------NewHistory FBO--------------------
+
+  // bind to the "new history" frame buffer to draw the blend between
+  // the "previous history" and the "current frame"
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[m_targetId]);
   // clear
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // grab an instance of ngl shader manager and ngl primitives
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
 
   // use the TAA shader to draw our image onto the screen-oriented plane
   (*shader)["TAA"]->use();
@@ -324,19 +350,38 @@ void NGLScene::paintGL()
 
   // send the uniforms to the TAA shader
   // textures
-  glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), m_currentId+5);
-  glUniform1i(glGetUniformLocation(pid, "previousFrameTex"), (1-m_currentId)+5);
+  glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), 9);
+  glUniform1i(glGetUniformLocation(pid, "previousFrameTex"), (1-m_targetId)+5);
   // window size
   glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
-  // the plane MVP
-  glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
-  glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
 
-  // draw the screen-oriented plane (the final image)
-  prim->draw("plane");
+  // draw the plane
+  drawScreenOrientedPlane(pid);
 
-  // switch the "current" id (from 0 -> 1, or from 1 -> 0)
-  m_currentId = 1-m_currentId;
+  // bind the blend fbo to the's texture attachment to a texture slot in memory
+  // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
+  glActiveTexture(GL_TEXTURE0 + m_targetId + 5);
+  glBindTexture(GL_TEXTURE_2D, m_fboTexId[m_targetId]);
+
+  //--------------------Default FBO----------------------
+
+  // bind to the default framebuffer
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // use the Texture shader to draw our image onto the screen-oriented plane
+  (*shader)["Texture"]->use();
+  pid = shader->getProgramID("Texture");
+
+  // send the NewHistory/output texture to the GPU
+  glUniform1i(glGetUniformLocation(pid, "frameTex"), m_targetId+5);
+  glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+
+  // draw the plane
+  drawScreenOrientedPlane(pid);
+
+  // switch the rendering target id (from 0 -> 1, or from 1 -> 0)
+  m_targetId = 1-m_targetId;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

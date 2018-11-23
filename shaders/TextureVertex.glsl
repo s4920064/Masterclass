@@ -7,19 +7,19 @@ layout (location = 1) in vec3 inNormal;
 /// @brief the in uv
 layout (location = 2) in vec2 inUV;
 
-out vec3 worldPos;
-out vec3 normal;
-
-
 uniform mat4 MVP;
-uniform mat4 normalMatrix;
-uniform mat4 M;
+
+//out vec3 worldPos;
+//out vec3 normal;
+
+//layout( std140) uniform TransformUBO
+//{
+//  mat4 MVP;
+//  mat4 normalMatrix;
+//  mat4 M;
+//}transforms;
 
 void main()
 {
-  worldPos = vec3(M * vec4(inVert, 1.0f));
-  normal=normalize(mat3(normalMatrix)*inNormal);
-  gl_Position = MVP*vec4(inVert,1.0);
-
-
+  gl_Position = MVP * vec4(inVert, 1.0);
 }
