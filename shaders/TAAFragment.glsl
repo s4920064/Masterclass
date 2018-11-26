@@ -16,7 +16,7 @@ void main()
   vec4 currColour = texture2D(currentFrameTex, texPos);
   vec4 prevColour = texture2D(previousFrameTex, texPos);
 
-  float blendFactor = 0.5;
+  float blendFactor = 0.2;
   vec4 Colour = blendFactor*currColour+(1-blendFactor)*prevColour;
 
   fragColour = Colour;

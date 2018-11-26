@@ -142,11 +142,34 @@ void NGLScene::loadMatricesToShader()
   }
 }
 
-void NGLScene::drawSceneGeometry()
+glm::mat4 NGLScene::jitterMatrix2x()
 {
+  float jitterDistance = 2.0;
+  glm::vec3 jitterTranslation = glm::vec3((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_WIDTH,
+                                          (jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_HEIGHT,
+                                          0.0f);
+  glm::mat4 jitterMatrix = glm::translate(glm::mat4(1.0), jitterTranslation);
+  return jitterMatrix;
+}
+
+void NGLScene::updateJitter()
+{
+  int samples = 2;
+  m_jitterCycle = (m_jitterCycle + 1) % samples;
+  //printf("%d\n",m_jitterCycle);
+}
+
+void NGLScene::drawSceneGeometry()
+{ 
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["PBR"]->use();
+
+  // jitter the view
+  m_view*=jitterMatrix2x();
+
+  // update the jitter matrix
+  updateJitter();
 
   // Rotation based on the mouse position for our global transform
   ngl::Mat4 rotX;
@@ -200,6 +223,8 @@ void NGLScene::drawScreenOrientedPlane(GLuint pid)
   // draw the screen-oriented plane (the final image)
   prim->draw("plane");
 }
+
+
 
 void NGLScene::createTextureObject()
 {
