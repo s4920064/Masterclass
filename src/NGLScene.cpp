@@ -27,8 +27,11 @@ void NGLScene::resizeGL( int _w, int _h )
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
-const static int TEXTURE_WIDTH=1024;
-const static int TEXTURE_HEIGHT=720;
+const static int TEXTURE_WIDTH=640;
+const static int TEXTURE_HEIGHT=480;
+
+const static int WINDOW_WIDTH=1024;
+const static int WINDOW_HEIGHT=720;
 
 void NGLScene::initializeGL()
 {
@@ -117,7 +120,7 @@ void NGLScene::initializeGL()
   createFramebufferObject();
 }
 
-void NGLScene::loadMatricesToShader()
+void NGLScene::loadMatricesToShader(ngl::Mat4 _jitter)
 {
   ngl::ShaderLib* shader = ngl::ShaderLib::instance();
   shader->use("PBR");
@@ -131,7 +134,7 @@ void NGLScene::loadMatricesToShader()
   transform t;
   t.M=m_view*m_mouseGlobalTX;
 
-  t.MVP=m_projection*t.M;
+  t.MVP=_jitter*m_projection*t.M;
   t.normalMatrix=t.M;
   t.normalMatrix.inverse().transpose();
   shader->setUniformBuffer("TransformUBO",sizeof(transform),&t.MVP.m_00);
@@ -144,7 +147,7 @@ void NGLScene::loadMatricesToShader()
 
 glm::mat4 NGLScene::jitterMatrix2x()
 {
-  float jitterDistance = 2.0;
+  float jitterDistance = 0.5;
   glm::vec3 jitterTranslation = glm::vec3((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_WIDTH,
                                           (jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_HEIGHT,
                                           0.0f);
@@ -152,11 +155,35 @@ glm::mat4 NGLScene::jitterMatrix2x()
   return jitterMatrix;
 }
 
-void NGLScene::updateJitter()
+glm::mat4 NGLScene::jitterMatrixQuincunx()
 {
-  int samples = 2;
+  float jitterDistance = 0.5;
+  glm::vec2 jitterTranslation;
+  switch(m_jitterCycle)
+  {
+    case 0:
+      jitterTranslation = glm::vec2(-jitterDistance,-jitterDistance);
+      break;
+    case 1:
+      jitterTranslation = glm::vec2(jitterDistance,-jitterDistance);
+      break;
+    case 2:
+      jitterTranslation = glm::vec2(jitterDistance,jitterDistance);
+      break;
+    case 3:
+      jitterTranslation = glm::vec2(-jitterDistance,jitterDistance);
+      break;
+    case 4:
+      jitterTranslation = glm::vec2(0.0,0.0);
+      break;
+  }
+  return glm::translate(glm::mat4(1.0),
+                        glm::vec3(jitterTranslation[0]/TEXTURE_WIDTH,jitterTranslation[1]/TEXTURE_HEIGHT,0.0));
+}
+void NGLScene::updateJitter(int samples)
+{
   m_jitterCycle = (m_jitterCycle + 1) % samples;
-  //printf("%d\n",m_jitterCycle);
+  printf("%d\n",m_jitterCycle);
 }
 
 void NGLScene::drawSceneGeometry()
@@ -165,11 +192,11 @@ void NGLScene::drawSceneGeometry()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["PBR"]->use();
 
-  // jitter the view
-  m_view*=jitterMatrix2x();
+  // create the jitter matrix
+  m_jitterMatrix = jitterMatrixQuincunx();
 
   // update the jitter matrix
-  updateJitter();
+  updateJitter(5);
 
   // Rotation based on the mouse position for our global transform
   ngl::Mat4 rotX;
@@ -191,7 +218,7 @@ void NGLScene::drawSceneGeometry()
   shader->use(ngl::nglCheckerShader);
   ngl::Mat4 tx;
   tx.translate(0.0f,-0.45f,0.0f);
-  ngl::Mat4 MVP=m_projection*m_view*m_mouseGlobalTX*tx;
+  ngl::Mat4 MVP=m_jitterMatrix*m_projection*m_view*m_mouseGlobalTX*tx;
   ngl::Mat3 normalMatrix=m_view*m_mouseGlobalTX;
   normalMatrix.inverse().transpose();
   shader->setUniform("MVP",MVP);
@@ -207,18 +234,18 @@ void NGLScene::drawSceneGeometry()
   // floor
   prim->draw("floor");
   // teapot
-  loadMatricesToShader();
+  loadMatricesToShader(m_jitterMatrix);
   prim->draw("teapot");
 }
 
-void NGLScene::drawScreenOrientedPlane(GLuint pid)
+void NGLScene::drawScreenOrientedPlane(GLuint _pid)
 {
   // grab an instance of ngl VAO primitives
   ngl::VAOPrimitives* prim = ngl::VAOPrimitives::instance();
 
   // the plane MVP
   glm::mat4 MVP_plane = glm::rotate(glm::mat4(1.0f), glm::pi<float>() * 0.5f, glm::vec3(1.0f,0.0f,0.0f));
-  glUniformMatrix4fv(glGetUniformLocation(pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
+  glUniformMatrix4fv(glGetUniformLocation(_pid, "MVP"), 1, false, glm::value_ptr(MVP_plane));
 
   // draw the screen-oriented plane (the final image)
   prim->draw("plane");
@@ -249,7 +276,7 @@ void NGLScene::createTextureObject()
     glGenTextures(1, &m_fboTexId[i]);
     // bind it to make it active
 
-    glActiveTexture(GL_TEXTURE5+i);
+    //glActiveTexture(GL_TEXTURE2+i);
     glBindTexture(GL_TEXTURE_2D, m_fboTexId[i]);
     // set params
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -273,7 +300,7 @@ void NGLScene::createTextureObject()
     // create a texture object
     glGenTextures(1, &m_fboDepthId[i]);
     // bind it to make it active
-    glActiveTexture(GL_TEXTURE7+i);
+    //glActiveTexture(GL_TEXTURE4+i);
     glBindTexture(GL_TEXTURE_2D, m_fboDepthId[i]);
     // set params
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -310,8 +337,8 @@ void NGLScene::createFramebufferObject()
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_fboDepthId[i], 0);
 
     //Set the fragment shader output targets (DEPTH_ATTACHMENT is done automatically)
-    GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, drawBufs);
+//    GLenum drawBufs[] = {GL_COLOR_ATTACHMENT0};
+//    glDrawBuffers(1, drawBufs);
 
     // now got back to the default render context
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -343,18 +370,23 @@ void NGLScene::paintGL()
   // draw the scene to the current rendering target
   drawSceneGeometry();
 
-  // bind the current fbo's texture attachment to a texture slot in memory
-  // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
-  glActiveTexture(GL_TEXTURE9);
+  // bind the current fbo's color attachment to a texture slot in memory
+  // always TEXTURE3
+  glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D, m_fboTexId[2]);
+
+  // bind the current fbo's depth attachment to a texture slot in memory
+  // always TEXTURE4
+  glActiveTexture(GL_TEXTURE4);
+  glBindTexture(GL_TEXTURE_2D, m_fboDepthId[2]);
 
   //-----------------PreviousHistory FBO-----------------
 
   // bind to the "previous history" fbo
   glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_targetId]);
 
-  // bind the accumulation fbo's texture attachment to a texture slot in memory
-  // (if it's fbo[0] to TEXTURE7, if it's fbo[1] TEXTURE8)
+  // bind the accumulation fbo's color attachment to a texture slot in memory
+  // (if it's fbo[0] to TEXTURE6, if it's fbo[1] TEXTURE5)
   glActiveTexture(GL_TEXTURE0 + (1-m_targetId)+5);
   glBindTexture(GL_TEXTURE_2D, m_fboTexId[1-m_targetId]);
 
@@ -375,15 +407,31 @@ void NGLScene::paintGL()
 
   // send the uniforms to the TAA shader
   // textures
-  glUniform1i(glGetUniformLocation(pid, "currentFrameTex"), 9);
-  glUniform1i(glGetUniformLocation(pid, "previousFrameTex"), (1-m_targetId)+5);
+  glUniform1i(glGetUniformLocation(pid, "_currentFrameTex"), 3);
+  glUniform1i(glGetUniformLocation(pid, "_currentDepthTex"), 4);
+  glUniform1i(glGetUniformLocation(pid, "_previousFrameTex"), (1-m_targetId)+5);
   // window size
-  glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+  glUniform2f(glGetUniformLocation(pid, "_textureSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+  // view matrix
+  shader->setUniform("_view", m_view);
+  shader->setUniform("_viewInverse", m_view.inverse());
+  shader->setUniform("_viewPrev", m_viewPrev);
+  shader->setUniform("_projection", m_projection);
+  shader->setUniform("_projectionInverse", m_projection.inverse());
+  //shader->setUniform("_jitter", m_jitterMatrix.inverse()*glm::vec4(0.0,0.0,0.0,1.0));
+  shader->setUniform("_jitter", glm::vec2(m_jitterMatrix[12],m_jitterMatrix[13]));
+
+  std::cout << "prev V pos" << ngl::Vec3(m_viewPrev[12],m_viewPrev[13],m_viewPrev[14]) << "\n";
+  std::cout << "curr V pos" << ngl::Vec3(m_view[12],m_view[13],m_view[14]) << "\n";
+  std::cout << "jittermatrix" << ngl::Vec3(m_jitterMatrix[12],m_jitterMatrix[13],m_jitterMatrix[14]) << "\n";
+
+  // store the current view matrix for next frame's "previous" view matrix
+  m_viewPrev = m_view;
 
   // draw the plane
   drawScreenOrientedPlane(pid);
 
-  // bind the blend fbo to the's texture attachment to a texture slot in memory
+  // bind the blend fbo's color attachment to a texture slot in memory
   // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
   glActiveTexture(GL_TEXTURE0 + m_targetId + 5);
   glBindTexture(GL_TEXTURE_2D, m_fboTexId[m_targetId]);
@@ -393,6 +441,7 @@ void NGLScene::paintGL()
   // bind to the default framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // use the Texture shader to draw our image onto the screen-oriented plane
   (*shader)["Texture"]->use();
@@ -400,7 +449,7 @@ void NGLScene::paintGL()
 
   // send the NewHistory/output texture to the GPU
   glUniform1i(glGetUniformLocation(pid, "frameTex"), m_targetId+5);
-  glUniform2f(glGetUniformLocation(pid, "windowSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
+  glUniform2f(glGetUniformLocation(pid, "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // draw the plane
   drawScreenOrientedPlane(pid);
@@ -421,16 +470,58 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_Escape:
       QGuiApplication::exit( EXIT_SUCCESS );
       break;
-// turn on wirframe rendering
-#ifndef USINGIOS_
+  // move the camera
+  #ifndef USINGIOS_
+
+    // forward
     case Qt::Key_W:
-      glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(0,0,0.01);
+      m_view = m_view * i;
+    }
       break;
-    // turn off wire frame
+    // backward
     case Qt::Key_S:
-      glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(0,0,-0.01);
+      m_view = m_view * i;
+    }
       break;
-#endif
+    // left
+    case Qt::Key_A:
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(0.01,0,0);
+      m_view = m_view * i;
+    }
+      break;
+    // right
+    case Qt::Key_D:
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(-0.01,0,0);
+      m_view = m_view * i;
+    }
+      break;
+    // up
+    case Qt::Key_Q:
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(0,-0.01,0);
+      m_view = m_view * i;
+    }
+      break;
+    // down
+    case Qt::Key_E:
+    {
+      ngl::Mat4 i = ngl::Mat4(1.0);
+      i.translate(0,0.01,0);
+      m_view = m_view * i;
+    }
+      break;
+  #endif
     // show full screen
     case Qt::Key_F:
       showFullScreen();

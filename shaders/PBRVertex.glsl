@@ -22,6 +22,4 @@ void main()
   worldPos = vec3(transforms.M * vec4(inVert, 1.0f));
   normal=normalize(mat3(transforms.normalMatrix)*inNormal);
   gl_Position = transforms.MVP*vec4(inVert,1.0);
-
-
 }
