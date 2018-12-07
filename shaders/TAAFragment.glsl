@@ -20,56 +20,75 @@ vec2 reprojectPreviousFrame(vec2 _c_uv)
   // current fragment cononical-view-volume space depth
   float c_z = texture2D(_currentDepthTex,_c_uv).r;
   // current fragment cononical-view-volume space position
-  vec4 c_cs = vec4(_c_uv,-c_z,1);
+  vec4 c_cs = vec4(2*_c_uv-1,-c_z,1);
   // current fragment in world-space
-  vec4 c_ws = _viewInverse*_projectionInverse*c_cs;
+  vec4 c_ws = _projectionInverse*_viewInverse*c_cs;
   // the previous fragment in cononical-view-volume space
   vec4 h_cs = _viewPrev*_projection*c_ws;
   // return the xy components as a uv lookup for sampling
-  return h_cs.xy;
+  return 0.5*h_cs.xy+0.5;
 }
 
 vec4 clampedHistory(vec2 _h_uv)
 {
+  // no. of pixels for the width/height of neighborhood
   int neighborSize = 3;
+  // starting values for the min and max color values
   vec4 neighborMin = vec4(1.0);
   vec4 neighborMax = vec4(0.0,0.0,0.0,1.0);
+
+  // for each pixel in the neighborhood
   for(int i;i<neighborSize;i++)
   {
-    // sample the neighborhood
-    for(int j;j<neighborSize;j++)
+    for(int j=0;j<neighborSize;j++)
     {
-      vec4 sampleColour = texture2D(_currentFrameTex,(gl_FragCoord.xy-vec2(int(neighborSize/2))+vec2(i,j))/_textureSize);
-      // build the min/max for each color channel
-      for(int c;c<3;c++)
+      // sample the neighborhood
+      vec4 sampleColour = texture2D(_currentFrameTex,(gl_FragCoord.xy-vec2(i,j))/_textureSize);
+
+      // using the sample, build the neighborhood min/max for each color channel
+      for(int c=0;c<3;c++)
       {
         neighborMin[c] = clamp(sampleColour[c],0.0,neighborMin[c]);
         neighborMax[c] = clamp(sampleColour[c],neighborMax[c],1.0);
       }
     }
   }
+
   // sample the previous frame
   vec4 prevColour = texture2D(_previousFrameTex,_h_uv);
-  // clamp the color to the neighborhood
+
+  // clamp the the previous frame's color to the current frame's neighborhood
   vec4 clampedColour = vec4(max(min(prevColour.r,neighborMax.r),neighborMin.r),
                       max(min(prevColour.g,neighborMax.g),neighborMin.g),
                       max(min(prevColour.b,neighborMax.b),neighborMin.b),
                       1.0);
   return clampedColour;
-//  return vec4(neighborMax.rgb/(neighborSize),1.0);
 }
 
 void main()
 {
+  // the uv coordinates for our current fragment
   vec2 c_uv = gl_FragCoord.xy / _textureSize;
-  //c_uv -= _jitter;
-  vec4 currColour = texture2D(_currentFrameTex, c_uv);
-  //vec2 h_uv = reprojectPreviousFrame(c_uv);
-  vec4 prevColour = texture2D(_previousFrameTex, c_uv);
-  //vec4 prevColour = clampedHistory(h_uv);
 
-  float blendFactor = 0.2;
+  //unjitter
+  //c_uv += _jitter;
+
+  // sample current color
+  vec4 currColour = texture2D(_currentFrameTex, c_uv);
+
+  // reproject previous frame
+  vec2 h_uv = reprojectPreviousFrame(c_uv);
+  vec4 prevColour = texture2D(_previousFrameTex, h_uv);
+
+  // use neighborhood clamping on previous frame
+  prevColour = clampedHistory(c_uv);
+
+  // will it blend?
+  float blendFactor = 0.1;
   vec4 Colour = blendFactor*currColour+(1-blendFactor)*prevColour;
+
+  // TO DO: check if the following function the same as the above line
+  //vec4 Colour = mix(prevColour,currColour, blendFactor);
 
   fragColour = Colour;
 }

@@ -27,11 +27,13 @@ void NGLScene::resizeGL( int _w, int _h )
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
-const static int TEXTURE_WIDTH=640;
-const static int TEXTURE_HEIGHT=480;
+const static int TEXTURE_WIDTH=480;
+const static int TEXTURE_HEIGHT=360;
 
 const static int WINDOW_WIDTH=1024;
 const static int WINDOW_HEIGHT=720;
+
+const static float CAM_MOVE_SPEED=0.02;
 
 void NGLScene::initializeGL()
 {
@@ -148,8 +150,8 @@ void NGLScene::loadMatricesToShader(ngl::Mat4 _jitter)
 glm::mat4 NGLScene::jitterMatrix2x()
 {
   float jitterDistance = 0.5;
-  glm::vec3 jitterTranslation = glm::vec3((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_WIDTH,
-                                          (jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_HEIGHT,
+  glm::vec3 jitterTranslation = glm::vec3(((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_WIDTH),
+                                          ((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_HEIGHT),
                                           0.0f);
   glm::mat4 jitterMatrix = glm::translate(glm::mat4(1.0), jitterTranslation);
   return jitterMatrix;
@@ -178,7 +180,7 @@ glm::mat4 NGLScene::jitterMatrixQuincunx()
       break;
   }
   return glm::translate(glm::mat4(1.0),
-                        glm::vec3(jitterTranslation[0]/TEXTURE_WIDTH,jitterTranslation[1]/TEXTURE_HEIGHT,0.0));
+                        glm::vec3((jitterTranslation[0]/TEXTURE_WIDTH),(jitterTranslation[1]/TEXTURE_HEIGHT),0.0));
 }
 void NGLScene::updateJitter(int samples)
 {
@@ -354,13 +356,10 @@ void NGLScene::createFramebufferObject()
 
 void NGLScene::paintGL()
 {
-  // update the image
-  update();
-
   //------------------CurrentFrame FBO-------------------
 
   // set the rendering target to the "current frame" fbo
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]); // always fbo[2]
 
   // clear the current rendering target
   glClearColor(0,0.2f,0.8f,1);
@@ -382,19 +381,18 @@ void NGLScene::paintGL()
 
   //-----------------PreviousHistory FBO-----------------
 
-  // bind to the "previous history" fbo
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_targetId]);
+  // bind to the "previous history" (accumulative history) fbo
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[1-m_targetId]); // either fbo[0] or fbo[1]
 
-  // bind the accumulation fbo's color attachment to a texture slot in memory
+  // bind "previous history" fbo color attachment to a texture slot in memory
   // (if it's fbo[0] to TEXTURE6, if it's fbo[1] TEXTURE5)
   glActiveTexture(GL_TEXTURE0 + (1-m_targetId)+5);
   glBindTexture(GL_TEXTURE_2D, m_fboTexId[1-m_targetId]);
 
   //-------------------NewHistory FBO--------------------
 
-  // bind to the "new history" frame buffer to draw the blend between
-  // the "previous history" and the "current frame"
-  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[m_targetId]);
+  // bind to "new history" fbo to draw the blend between "previous history" and "current frame"
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fboId[m_targetId]); // either fbo[1] or fbo[0]
   // clear
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -409,7 +407,7 @@ void NGLScene::paintGL()
   // textures
   glUniform1i(glGetUniformLocation(pid, "_currentFrameTex"), 3);
   glUniform1i(glGetUniformLocation(pid, "_currentDepthTex"), 4);
-  glUniform1i(glGetUniformLocation(pid, "_previousFrameTex"), (1-m_targetId)+5);
+  glUniform1i(glGetUniformLocation(pid, "_previousFrameTex"), (1-m_targetId)+5); //either 6 or 5
   // window size
   glUniform2f(glGetUniformLocation(pid, "_textureSize"), TEXTURE_WIDTH, TEXTURE_HEIGHT);
   // view matrix
@@ -419,7 +417,7 @@ void NGLScene::paintGL()
   shader->setUniform("_projection", m_projection);
   shader->setUniform("_projectionInverse", m_projection.inverse());
   //shader->setUniform("_jitter", m_jitterMatrix.inverse()*glm::vec4(0.0,0.0,0.0,1.0));
-  shader->setUniform("_jitter", glm::vec2(m_jitterMatrix[12],m_jitterMatrix[13]));
+  shader->setUniform("_jitter", glm::vec2(m_jitterMatrix[12]*0.5,m_jitterMatrix[13]*0.5));
 
   std::cout << "prev V pos" << ngl::Vec3(m_viewPrev[12],m_viewPrev[13],m_viewPrev[14]) << "\n";
   std::cout << "curr V pos" << ngl::Vec3(m_view[12],m_view[13],m_view[14]) << "\n";
@@ -433,6 +431,7 @@ void NGLScene::paintGL()
 
   // bind the blend fbo's color attachment to a texture slot in memory
   // (if it's fbo[0] to TEXTURE5, if it's fbo[1] to TEXTURE6)
+  // because of the texture's location, it will become previous history in next frame
   glActiveTexture(GL_TEXTURE0 + m_targetId + 5);
   glBindTexture(GL_TEXTURE_2D, m_fboTexId[m_targetId]);
 
@@ -448,7 +447,7 @@ void NGLScene::paintGL()
   pid = shader->getProgramID("Texture");
 
   // send the NewHistory/output texture to the GPU
-  glUniform1i(glGetUniformLocation(pid, "frameTex"), m_targetId+5);
+  glUniform1i(glGetUniformLocation(pid, "frameTex"), m_targetId+5); // either 5 or 6
   glUniform2f(glGetUniformLocation(pid, "windowSize"), WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // draw the plane
@@ -456,6 +455,9 @@ void NGLScene::paintGL()
 
   // switch the rendering target id (from 0 -> 1, or from 1 -> 0)
   m_targetId = 1-m_targetId;
+
+  // update the image
+  update();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -477,7 +479,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_W:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(0,0,0.01);
+      i.translate(0,0,CAM_MOVE_SPEED);
       m_view = m_view * i;
     }
       break;
@@ -485,7 +487,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_S:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(0,0,-0.01);
+      i.translate(0,0,-CAM_MOVE_SPEED);
       m_view = m_view * i;
     }
       break;
@@ -493,7 +495,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_A:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(0.01,0,0);
+      i.translate(CAM_MOVE_SPEED,0,0);
       m_view = m_view * i;
     }
       break;
@@ -501,7 +503,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_D:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(-0.01,0,0);
+      i.translate(-CAM_MOVE_SPEED,0,0);
       m_view = m_view * i;
     }
       break;
@@ -509,7 +511,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_Q:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(0,-0.01,0);
+      i.translate(0,-CAM_MOVE_SPEED,0);
       m_view = m_view * i;
     }
       break;
@@ -517,7 +519,7 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
     case Qt::Key_E:
     {
       ngl::Mat4 i = ngl::Mat4(1.0);
-      i.translate(0,0.01,0);
+      i.translate(0,CAM_MOVE_SPEED,0);
       m_view = m_view * i;
     }
       break;
