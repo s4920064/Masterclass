@@ -27,8 +27,12 @@ void NGLScene::resizeGL( int _w, int _h )
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
-const static int TEXTURE_WIDTH=480;
-const static int TEXTURE_HEIGHT=360;
+
+//const static int TEXTURE_WIDTH=480;
+//const static int TEXTURE_HEIGHT=360;
+
+const static int TEXTURE_WIDTH=1024;
+const static int TEXTURE_HEIGHT=720;
 
 const static int WINDOW_WIDTH=1024;
 const static int WINDOW_HEIGHT=720;
@@ -45,11 +49,12 @@ void NGLScene::initializeGL()
   glClearColor( 0.4f, 0.4f, 0.4f, 1.0f ); // Grey Background
   // Enable 2D texturing
   glEnable(GL_TEXTURE_2D);
+
   // enable depth testing for drawing
   glEnable( GL_DEPTH_TEST );
 
-//  // enable multisampling for smoother drawing
-//  glEnable( GL_MULTISAMPLE );
+  // enable multisampling for smoother drawing
+  glEnable( GL_MULTISAMPLE );
 
   // now to load the shader and set the values
   // grab an instance of shader manager
@@ -154,6 +159,10 @@ glm::mat4 NGLScene::jitterMatrix2x()
                                           ((jitterDistance*(1-2*float(m_jitterCycle)))/TEXTURE_HEIGHT),
                                           0.0f);
   glm::mat4 jitterMatrix = glm::translate(glm::mat4(1.0), jitterTranslation);
+
+  // update the jitter cycle
+  updateJitter(2);
+
   return jitterMatrix;
 }
 
@@ -179,9 +188,14 @@ glm::mat4 NGLScene::jitterMatrixQuincunx()
       jitterTranslation = glm::vec2(0.0,0.0);
       break;
   }
+
+  // update the jitter cycle
+  updateJitter(5);
+
   return glm::translate(glm::mat4(1.0),
                         glm::vec3((jitterTranslation[0]/TEXTURE_WIDTH),(jitterTranslation[1]/TEXTURE_HEIGHT),0.0));
 }
+
 void NGLScene::updateJitter(int samples)
 {
   m_jitterCycle = (m_jitterCycle + 1) % samples;
@@ -194,11 +208,11 @@ void NGLScene::drawSceneGeometry()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["PBR"]->use();
 
-  // create the jitter matrix
-  m_jitterMatrix = jitterMatrixQuincunx();
-
-  // update the jitter matrix
-  updateJitter(5);
+  if(m_TAAFlag)
+  {
+    // create the jitter matrix
+    m_jitterMatrix = jitterMatrixQuincunx();
+  }
 
   // Rotation based on the mouse position for our global transform
   ngl::Mat4 rotX;
@@ -358,6 +372,17 @@ void NGLScene::paintGL()
 {
   //------------------CurrentFrame FBO-------------------
 
+  // enable multisampling if TAA is off and we're comparing
+  if(m_TAAFlag)
+  {
+    glEnable( GL_DEPTH_TEST );
+    glEnable(GL_MULTISAMPLE);
+  }
+  else
+  {
+    glDisable(GL_MULTISAMPLE);
+  }
+
   // set the rendering target to the "current frame" fbo
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]); // always fbo[2]
 
@@ -404,6 +429,17 @@ void NGLScene::paintGL()
   GLuint pid = shader->getProgramID("TAA");
 
   // send the uniforms to the TAA shader
+  // subroutine
+  GLuint TAA_subroutine_index;
+  if(m_TAAFlag)
+  {
+    TAA_subroutine_index = glGetSubroutineIndex(pid, GL_FRAGMENT_SHADER, "on" );
+  }
+  else
+  {
+    TAA_subroutine_index = glGetSubroutineIndex(pid, GL_FRAGMENT_SHADER, "off" );
+  }
+  glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &TAA_subroutine_index);
   // textures
   glUniform1i(glGetUniformLocation(pid, "_currentFrameTex"), 3);
   glUniform1i(glGetUniformLocation(pid, "_currentDepthTex"), 4);
@@ -523,7 +559,11 @@ void NGLScene::keyPressEvent( QKeyEvent* _event )
       m_view = m_view * i;
     }
       break;
+    case Qt::Key_T:
+     m_TAAFlag=!m_TAAFlag;
+      break;
   #endif
+
     // show full screen
     case Qt::Key_F:
       showFullScreen();

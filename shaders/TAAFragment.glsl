@@ -1,6 +1,10 @@
-#version 330 core
+#version 400 core
 
 layout (location =0) out vec4 fragColour;
+
+subroutine vec4 temporalAA();
+
+subroutine uniform temporalAA TAAOnOff;
 
 uniform sampler2D _currentFrameTex;
 uniform sampler2D _currentDepthTex;
@@ -65,13 +69,14 @@ vec4 clampedHistory(vec2 _h_uv)
   return clampedColour;
 }
 
-void main()
+subroutine(temporalAA)
+vec4 on()
 {
   // the uv coordinates for our current fragment
   vec2 c_uv = gl_FragCoord.xy / _textureSize;
 
   //unjitter
-  //c_uv += _jitter;
+  c_uv += _jitter;
 
   // sample current color
   vec4 currColour = texture2D(_currentFrameTex, c_uv);
@@ -83,12 +88,21 @@ void main()
   // use neighborhood clamping on previous frame
   prevColour = clampedHistory(c_uv);
 
-  // will it blend?
-  float blendFactor = 0.1;
-  vec4 Colour = blendFactor*currColour+(1-blendFactor)*prevColour;
+  // blend the two frames
+  float blendFactor = 0.05;
+  return blendFactor*currColour+(1-blendFactor)*prevColour;
+}
 
-  // TO DO: check if the following function the same as the above line
-  //vec4 Colour = mix(prevColour,currColour, blendFactor);
+subroutine(temporalAA)
+vec4 off()
+{
+  // the uv coordinates for our current fragment
+  vec2 c_uv = gl_FragCoord.xy / _textureSize;
+  // sample current color
+  return texture2D(_currentFrameTex, c_uv);
+}
 
-  fragColour = Colour;
+void main()
+{
+  fragColour = TAAOnOff();
 }
