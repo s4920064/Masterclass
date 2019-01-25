@@ -1,18 +1,12 @@
 #version 330 core
-// This code is based on code from here https://learnopengl.com/#!PBR/Lighting
-layout (location =0) out vec4 fragColour;
 
-//in vec3 worldPos;
-//in vec3 normal;
-
-uniform sampler2D frameTex;
-
-uniform vec2 windowSize;
-
-void main()
+// this is a pointer to the current 2D texture object
+uniform sampler2D tex;
+// the vertex UV
+in vec2 vertUV;
+layout (location=0)out vec4 outColour;
+void main ()
 {
-  vec2 texPos = gl_FragCoord.xy / windowSize;
-  vec4 Colour = texture2D(frameTex, texPos);
-
-  fragColour = Colour;
+ // set the fragment colour to the current texture
+ outColour = texture(tex,vertUV*8);
 }

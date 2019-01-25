@@ -1,0 +1,301 @@
+\section{Camera Struct Reference}
+\label{struct_camera}\index{Camera@{Camera}}
+
+
+A struct to handle the camera parameters which are driven by the mouse and keyboard input.  
+
+
+
+
+{\ttfamily \#include $<$Camera.\+h$>$}
+
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Q\+Cursor \textbf{ cursor}
+\begin{DoxyCompactList}\small\item\em Qcursor instance (need it to reset the cursor to the center of the screen) \end{DoxyCompactList}\item 
+float \textbf{ cursorX}
+\begin{DoxyCompactList}\small\item\em the screen space X coordinate of the cursor \end{DoxyCompactList}\item 
+float \textbf{ cursorY}
+\begin{DoxyCompactList}\small\item\em the screen space X coordinate of the cursor \end{DoxyCompactList}\item 
+bool \textbf{ zoom} = false
+\begin{DoxyCompactList}\small\item\em flag to indicate if the left mouse button is pressed when dragging \end{DoxyCompactList}\item 
+int \textbf{ zoom\+Size} = 250
+\begin{DoxyCompactList}\small\item\em size (in pixels) of the square that zooms into our image on L\+MB click \end{DoxyCompactList}\item 
+float \textbf{ zoom\+Scale} = 5
+\begin{DoxyCompactList}\small\item\em zoomed dimensions \end{DoxyCompactList}\item 
+glm\+::vec4 \textbf{ zoom\+Square}
+\begin{DoxyCompactList}\small\item\em the bounding box of the zoom square \end{DoxyCompactList}\item 
+bool \textbf{ rotate} = false
+\begin{DoxyCompactList}\small\item\em flag to indicate if the right mouse button is pressed when dragging \end{DoxyCompactList}\item 
+float \textbf{ translateF} = 0
+\begin{DoxyCompactList}\small\item\em flag indicating if the W key was pressed \end{DoxyCompactList}\item 
+float \textbf{ translateB} = 0
+\begin{DoxyCompactList}\small\item\em flag indicating if the S key was pressed \end{DoxyCompactList}\item 
+float \textbf{ translateL} = 0
+\begin{DoxyCompactList}\small\item\em flag indicating if the A key was pressed \end{DoxyCompactList}\item 
+float \textbf{ translateR} = 0
+\begin{DoxyCompactList}\small\item\em flag indicating if the D key was pressed \end{DoxyCompactList}\item 
+float \textbf{ pitch} = -\/45
+\begin{DoxyCompactList}\small\item\em total pitch amount \end{DoxyCompactList}\item 
+float \textbf{ yaw} = -\/90
+\begin{DoxyCompactList}\small\item\em total yaw amount \end{DoxyCompactList}\item 
+glm\+::vec3 \textbf{ pos}
+\begin{DoxyCompactList}\small\item\em the current position of our camera \end{DoxyCompactList}\item 
+glm\+::vec3 \textbf{ front}
+\begin{DoxyCompactList}\small\item\em the directional vector of where our camera is looking at \end{DoxyCompactList}\item 
+glm\+::vec3 \textbf{ up}
+\begin{DoxyCompactList}\small\item\em where is up \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A struct to handle the camera parameters which are driven by the mouse and keyboard input. 
+
+Definition at line 15 of file Camera.\+h.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{struct_camera_ae3146e9055b472147b4911aef64135fe}} 
+\index{Camera@{Camera}!cursor@{cursor}}
+\index{cursor@{cursor}!Camera@{Camera}}
+\subsubsection{cursor}
+{\footnotesize\ttfamily Q\+Cursor Camera\+::cursor}
+
+
+
+Qcursor instance (need it to reset the cursor to the center of the screen) 
+
+
+
+Definition at line 20 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a5e8bf29b7ca66b211c99693a7ecdb764}} 
+\index{Camera@{Camera}!cursorX@{cursorX}}
+\index{cursorX@{cursorX}!Camera@{Camera}}
+\subsubsection{cursorX}
+{\footnotesize\ttfamily float Camera\+::cursorX}
+
+
+
+the screen space X coordinate of the cursor 
+
+
+
+Definition at line 24 of file Camera.\+h.
+
+\mbox{\label{struct_camera_ae36962da8f699c5635dc6ea750400983}} 
+\index{Camera@{Camera}!cursorY@{cursorY}}
+\index{cursorY@{cursorY}!Camera@{Camera}}
+\subsubsection{cursorY}
+{\footnotesize\ttfamily float Camera\+::cursorY}
+
+
+
+the screen space X coordinate of the cursor 
+
+
+
+Definition at line 28 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a8847cf29c9c124906ad5d97ecb5c55d1}} 
+\index{Camera@{Camera}!front@{front}}
+\index{front@{front}!Camera@{Camera}}
+\subsubsection{front}
+{\footnotesize\ttfamily glm\+::vec3 Camera\+::front}
+
+
+
+the directional vector of where our camera is looking at 
+
+
+
+Definition at line 80 of file Camera.\+h.
+
+\mbox{\label{struct_camera_ab56fcb39f580e8d2159cf2c9c6d9a65a}} 
+\index{Camera@{Camera}!pitch@{pitch}}
+\index{pitch@{pitch}!Camera@{Camera}}
+\subsubsection{pitch}
+{\footnotesize\ttfamily float Camera\+::pitch = -\/45}
+
+
+
+total pitch amount 
+
+
+
+Definition at line 68 of file Camera.\+h.
+
+\mbox{\label{struct_camera_ae54915cea5c8741a9cc38b8f9b6849ff}} 
+\index{Camera@{Camera}!pos@{pos}}
+\index{pos@{pos}!Camera@{Camera}}
+\subsubsection{pos}
+{\footnotesize\ttfamily glm\+::vec3 Camera\+::pos}
+
+
+
+the current position of our camera 
+
+
+
+Definition at line 76 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a3c93358666e338932c06434f8127e31d}} 
+\index{Camera@{Camera}!rotate@{rotate}}
+\index{rotate@{rotate}!Camera@{Camera}}
+\subsubsection{rotate}
+{\footnotesize\ttfamily bool Camera\+::rotate = false}
+
+
+
+flag to indicate if the right mouse button is pressed when dragging 
+
+
+
+Definition at line 48 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a8ff297e07c4dd94f7850fd69edb27a8e}} 
+\index{Camera@{Camera}!translateB@{translateB}}
+\index{translateB@{translateB}!Camera@{Camera}}
+\subsubsection{translateB}
+{\footnotesize\ttfamily float Camera\+::translateB = 0}
+
+
+
+flag indicating if the S key was pressed 
+
+
+
+Definition at line 56 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a996d8a55c56058a6309ae8f68a7b8e50}} 
+\index{Camera@{Camera}!translateF@{translateF}}
+\index{translateF@{translateF}!Camera@{Camera}}
+\subsubsection{translateF}
+{\footnotesize\ttfamily float Camera\+::translateF = 0}
+
+
+
+flag indicating if the W key was pressed 
+
+
+
+Definition at line 52 of file Camera.\+h.
+
+\mbox{\label{struct_camera_abcbcd3643d3bc71f8b60ab1383b13acc}} 
+\index{Camera@{Camera}!translateL@{translateL}}
+\index{translateL@{translateL}!Camera@{Camera}}
+\subsubsection{translateL}
+{\footnotesize\ttfamily float Camera\+::translateL = 0}
+
+
+
+flag indicating if the A key was pressed 
+
+
+
+Definition at line 60 of file Camera.\+h.
+
+\mbox{\label{struct_camera_ae212bbf40672342ca97d76a761328711}} 
+\index{Camera@{Camera}!translateR@{translateR}}
+\index{translateR@{translateR}!Camera@{Camera}}
+\subsubsection{translateR}
+{\footnotesize\ttfamily float Camera\+::translateR = 0}
+
+
+
+flag indicating if the D key was pressed 
+
+
+
+Definition at line 64 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a3fe5f351380fb118ffc600591769f049}} 
+\index{Camera@{Camera}!up@{up}}
+\index{up@{up}!Camera@{Camera}}
+\subsubsection{up}
+{\footnotesize\ttfamily glm\+::vec3 Camera\+::up}
+
+
+
+where is up 
+
+
+
+Definition at line 84 of file Camera.\+h.
+
+\mbox{\label{struct_camera_ad76701b22630f2df28a0ae15f0497a3a}} 
+\index{Camera@{Camera}!yaw@{yaw}}
+\index{yaw@{yaw}!Camera@{Camera}}
+\subsubsection{yaw}
+{\footnotesize\ttfamily float Camera\+::yaw = -\/90}
+
+
+
+total yaw amount 
+
+
+
+Definition at line 72 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a64956b351b5b0173c3d06326ccb43f45}} 
+\index{Camera@{Camera}!zoom@{zoom}}
+\index{zoom@{zoom}!Camera@{Camera}}
+\subsubsection{zoom}
+{\footnotesize\ttfamily bool Camera\+::zoom = false}
+
+
+
+flag to indicate if the left mouse button is pressed when dragging 
+
+
+
+Definition at line 32 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a9523c02d11d2fd610906075d52274691}} 
+\index{Camera@{Camera}!zoomScale@{zoomScale}}
+\index{zoomScale@{zoomScale}!Camera@{Camera}}
+\subsubsection{zoomScale}
+{\footnotesize\ttfamily float Camera\+::zoom\+Scale = 5}
+
+
+
+zoomed dimensions 
+
+
+
+Definition at line 40 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a6c16a6c3ae9bcb17c63bc499bdbbe287}} 
+\index{Camera@{Camera}!zoomSize@{zoomSize}}
+\index{zoomSize@{zoomSize}!Camera@{Camera}}
+\subsubsection{zoomSize}
+{\footnotesize\ttfamily int Camera\+::zoom\+Size = 250}
+
+
+
+size (in pixels) of the square that zooms into our image on L\+MB click 
+
+
+
+Definition at line 36 of file Camera.\+h.
+
+\mbox{\label{struct_camera_a1777fb1bafb5ab01be8bf44cbac1943a}} 
+\index{Camera@{Camera}!zoomSquare@{zoomSquare}}
+\index{zoomSquare@{zoomSquare}!Camera@{Camera}}
+\subsubsection{zoomSquare}
+{\footnotesize\ttfamily glm\+::vec4 Camera\+::zoom\+Square}
+
+
+
+the bounding box of the zoom square 
+
+
+
+Definition at line 44 of file Camera.\+h.
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/include/\textbf{ Camera.\+h}\end{DoxyCompactItemize}

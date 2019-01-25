@@ -1,0 +1,202 @@
+\section{Jitter Class Reference}
+\label{class_jitter}\index{Jitter@{Jitter}}
+
+
+A class to handle the generation and evolution of the scene\textquotesingle{}s jitter.  
+
+
+
+
+{\ttfamily \#include $<$Jitter.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Jitter} ()
+\begin{DoxyCompactList}\small\item\em ctor for the jitter class \end{DoxyCompactList}\item 
+\textbf{ $\sim$\+Jitter} ()
+\begin{DoxyCompactList}\small\item\em dtor \end{DoxyCompactList}\item 
+void \textbf{ make2x} ()
+\begin{DoxyCompactList}\small\item\em generates a translation matrix that jitters the current frame (2 subsamples) \end{DoxyCompactList}\item 
+void \textbf{ make\+Quincunx} ()
+\begin{DoxyCompactList}\small\item\em generates a translation matrix that jitters the current frame (5 subsamples in quincunx pattern) \end{DoxyCompactList}\item 
+ngl\+::\+Mat4 \textbf{ get\+Matrix} () const
+\begin{DoxyCompactList}\small\item\em returns the jitter translation matrix \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \textbf{ get\+Offset} () const
+\begin{DoxyCompactList}\small\item\em returns the jitter offset vector \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \textbf{ update\+Cycle} (int samples)
+\begin{DoxyCompactList}\small\item\em updates the jitter\+Cycle id -\/ incrementing it and resetting when the maximum index is reached (2 or 5) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \textbf{ m\+\_\+cycle} = 0
+\begin{DoxyCompactList}\small\item\em an id which keeps track of the number of subsamples we are iterating through in the jitter pattern \end{DoxyCompactList}\item 
+ngl\+::\+Mat4 \textbf{ m\+\_\+matrix}
+\begin{DoxyCompactList}\small\item\em a matrix containing the translations for our current jitter \end{DoxyCompactList}\item 
+ngl\+::\+Vec2 \textbf{ m\+\_\+offset}
+\begin{DoxyCompactList}\small\item\em the translations for our current jitter \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A class to handle the generation and evolution of the scene\textquotesingle{}s jitter. 
+
+Definition at line 15 of file Jitter.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\label{class_jitter_a2421580e189673636b2094096aea272d}} 
+\index{Jitter@{Jitter}!Jitter@{Jitter}}
+\index{Jitter@{Jitter}!Jitter@{Jitter}}
+\subsubsection{Jitter()}
+{\footnotesize\ttfamily Jitter\+::\+Jitter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+ctor for the jitter class 
+
+
+
+Definition at line 4 of file Jitter.\+cpp.
+
+\mbox{\label{class_jitter_ab758097d6315fafe62add573bfd2f338}} 
+\index{Jitter@{Jitter}!````~Jitter@{$\sim$Jitter}}
+\index{````~Jitter@{$\sim$Jitter}!Jitter@{Jitter}}
+\subsubsection{$\sim$Jitter()}
+{\footnotesize\ttfamily Jitter\+::$\sim$\+Jitter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+dtor 
+
+
+
+Definition at line 10 of file Jitter.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\label{class_jitter_a6846cef13fabacb867504489b716f9b8}} 
+\index{Jitter@{Jitter}!getMatrix@{getMatrix}}
+\index{getMatrix@{getMatrix}!Jitter@{Jitter}}
+\subsubsection{getMatrix()}
+{\footnotesize\ttfamily ngl\+::\+Mat4 Jitter\+::get\+Matrix (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+returns the jitter translation matrix 
+
+
+
+Definition at line 37 of file Jitter.\+h.
+
+\mbox{\label{class_jitter_a1bbe27eaa582da19f6cc7b1a1a78cbc1}} 
+\index{Jitter@{Jitter}!getOffset@{getOffset}}
+\index{getOffset@{getOffset}!Jitter@{Jitter}}
+\subsubsection{getOffset()}
+{\footnotesize\ttfamily ngl\+::\+Vec2 Jitter\+::get\+Offset (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+returns the jitter offset vector 
+
+
+
+Definition at line 41 of file Jitter.\+h.
+
+\mbox{\label{class_jitter_a082c09130e20efe60163d50fab9e56c7}} 
+\index{Jitter@{Jitter}!make2x@{make2x}}
+\index{make2x@{make2x}!Jitter@{Jitter}}
+\subsubsection{make2x()}
+{\footnotesize\ttfamily void Jitter\+::make2x (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+generates a translation matrix that jitters the current frame (2 subsamples) 
+
+
+
+Definition at line 15 of file Jitter.\+cpp.
+
+\mbox{\label{class_jitter_ae49d79bb19617b8c6b45ed841d7a47ab}} 
+\index{Jitter@{Jitter}!makeQuincunx@{makeQuincunx}}
+\index{makeQuincunx@{makeQuincunx}!Jitter@{Jitter}}
+\subsubsection{makeQuincunx()}
+{\footnotesize\ttfamily void Jitter\+::make\+Quincunx (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+generates a translation matrix that jitters the current frame (5 subsamples in quincunx pattern) 
+
+
+
+Definition at line 30 of file Jitter.\+cpp.
+
+\mbox{\label{class_jitter_ad04d34a1f66b32208eec994949d0004c}} 
+\index{Jitter@{Jitter}!updateCycle@{updateCycle}}
+\index{updateCycle@{updateCycle}!Jitter@{Jitter}}
+\subsubsection{updateCycle()}
+{\footnotesize\ttfamily void Jitter\+::update\+Cycle (\begin{DoxyParamCaption}\item[{int}]{samples }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+updates the jitter\+Cycle id -\/ incrementing it and resetting when the maximum index is reached (2 or 5) 
+
+
+
+Definition at line 61 of file Jitter.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{class_jitter_a01fec565d381d9aacea27dae75fa226d}} 
+\index{Jitter@{Jitter}!m\_cycle@{m\_cycle}}
+\index{m\_cycle@{m\_cycle}!Jitter@{Jitter}}
+\subsubsection{m\_cycle}
+{\footnotesize\ttfamily int Jitter\+::m\+\_\+cycle = 0\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+an id which keeps track of the number of subsamples we are iterating through in the jitter pattern 
+
+
+
+Definition at line 51 of file Jitter.\+h.
+
+\mbox{\label{class_jitter_a67d037e5eef7f41caeaca6cb4fece173}} 
+\index{Jitter@{Jitter}!m\_matrix@{m\_matrix}}
+\index{m\_matrix@{m\_matrix}!Jitter@{Jitter}}
+\subsubsection{m\_matrix}
+{\footnotesize\ttfamily ngl\+::\+Mat4 Jitter\+::m\+\_\+matrix\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+a matrix containing the translations for our current jitter 
+
+
+
+Definition at line 55 of file Jitter.\+h.
+
+\mbox{\label{class_jitter_ad44c515b5713cda0df2404434eea6824}} 
+\index{Jitter@{Jitter}!m\_offset@{m\_offset}}
+\index{m\_offset@{m\_offset}!Jitter@{Jitter}}
+\subsubsection{m\_offset}
+{\footnotesize\ttfamily ngl\+::\+Vec2 Jitter\+::m\+\_\+offset\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the translations for our current jitter 
+
+
+
+Definition at line 59 of file Jitter.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/include/\textbf{ Jitter.\+h}\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/src/\textbf{ Jitter.\+cpp}\end{DoxyCompactItemize}

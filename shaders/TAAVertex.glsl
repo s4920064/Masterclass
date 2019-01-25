@@ -8,16 +8,7 @@ layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec2 inUV;
 
 uniform mat4 MVP;
-
-//out vec3 worldPos;
-//out vec3 normal;
-
-//layout( std140) uniform TransformUBO
-//{
-//  mat4 MVP;
-//  mat4 normalMatrix;
-//  mat4 M;
-//}transforms;
+uniform vec2 _textureSize;
 
 void main()
 {

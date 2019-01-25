@@ -1,0 +1,61 @@
+\hypertarget{class_scene}{}\section{Scene Class Reference}
+\label{class_scene}\index{Scene@{Scene}}
+
+
+our main glwindow widget for N\+GL applications all drawing elements are put in this file  
+
+
+
+
+{\ttfamily \#include $<$Scene.\+h$>$}
+
+
+
+Inheritance diagram for Scene\+:
+% FIG 0
+
+
+Collaboration diagram for Scene\+:
+% FIG 1
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_scene_ad10176d75a9cc0da56626f682d083507}{Scene}} ()
+\begin{DoxyCompactList}\small\item\em ctor for our N\+GL drawing class \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_scene_a9990bde99d4f00742ed4de308bf194ae}\label{class_scene_a9990bde99d4f00742ed4de308bf194ae}} 
+\mbox{\hyperlink{class_scene_a9990bde99d4f00742ed4de308bf194ae}{$\sim$\+Scene}} () override
+\begin{DoxyCompactList}\small\item\em dtor must close down ngl and release Open\+GL resources \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_scene_a0342c4d5793669ee7498a75c13026880}\label{class_scene_a0342c4d5793669ee7498a75c13026880}} 
+void \mbox{\hyperlink{class_scene_a0342c4d5793669ee7498a75c13026880}{initialize\+GL}} () override
+\begin{DoxyCompactList}\small\item\em the initialize class is called once when the window is created and we have a valid GL context use this to setup any default GL stuff \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_scene_ab0c23a9c2bb68b75465b4fddcb7975a5}\label{class_scene_ab0c23a9c2bb68b75465b4fddcb7975a5}} 
+void \mbox{\hyperlink{class_scene_ab0c23a9c2bb68b75465b4fddcb7975a5}{paint\+GL}} () override
+\begin{DoxyCompactList}\small\item\em this is called everytime we want to draw the scene \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+our main glwindow widget for N\+GL applications all drawing elements are put in this file 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_scene_ad10176d75a9cc0da56626f682d083507}\label{class_scene_ad10176d75a9cc0da56626f682d083507}} 
+\index{Scene@{Scene}!Scene@{Scene}}
+\index{Scene@{Scene}!Scene@{Scene}}
+\subsubsection{\texorpdfstring{Scene()}{Scene()}}
+{\footnotesize\ttfamily Scene\+::\+Scene (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+ctor for our N\+GL drawing class 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em parent} & the parent window to the class \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/Scene.\+h\item 
+src/Mouse\+Key\+Events.\+cpp\item 
+src/Scene.\+cpp\end{DoxyCompactItemize}

@@ -1,7 +1,7 @@
 /****************************************************************************
 basic OpenGL demo modified from http://qt-project.org/doc/qt-5.0/qtgui/openglwindow.html
 ****************************************************************************/
-#include "NGLScene.h"
+#include "Scene.h"
 #include <QtGui/QGuiApplication>
 #include <iostream>
 
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   QSurfaceFormat::setDefaultFormat(format);
 
   // now we are going to create our scene window
-  NGLScene window;
+  Scene window;
 
   // we can now query the version to see if it worked
   std::cout << "Profile is " << format.majorVersion() << " " << format.minorVersion() << "\n";

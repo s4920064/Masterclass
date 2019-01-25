@@ -1,0 +1,710 @@
+\section{Scene Class Reference}
+\label{class_scene}\index{Scene@{Scene}}
+
+
+This class inherits from the Qt Open\+G\+L\+Window and draws the scene with the T\+AA shader before passing the result to the screen.  
+
+
+
+
+{\ttfamily \#include $<$Scene.\+h$>$}
+
+Inheritance diagram for Scene\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_scene}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\textbf{ Scene} ()
+\begin{DoxyCompactList}\small\item\em ctor for our N\+GL drawing class \end{DoxyCompactList}\item 
+\textbf{ $\sim$\+Scene} () override
+\begin{DoxyCompactList}\small\item\em dtor must close down ngl and release Open\+GL resources \end{DoxyCompactList}\item 
+void \textbf{ initialize\+GL} () override
+\begin{DoxyCompactList}\small\item\em the initialize class is called once when the window is created and we have a valid GL context use this to setup any default GL stuff \end{DoxyCompactList}\item 
+void \textbf{ paint\+GL} () override
+\begin{DoxyCompactList}\small\item\em this is called everytime we want to draw the scene \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \textbf{ load\+Matrices\+To\+Shader} (const char $\ast$shader\+Name, ngl\+::\+Mat4 \+\_\+M)
+\begin{DoxyCompactList}\small\item\em method to load transform matrices to the shader, originally by Jon Macey, modified \end{DoxyCompactList}\item 
+void \textbf{ load\+Texture} ()
+\begin{DoxyCompactList}\small\item\em method to load a texture from file, code by Jon Macey \end{DoxyCompactList}\item 
+void \textbf{ create\+Texture\+Objects} ()
+\begin{DoxyCompactList}\small\item\em creates the texture objects for the F\+B\+Os \end{DoxyCompactList}\item 
+void \textbf{ create\+Framebuffer\+Object} ()
+\begin{DoxyCompactList}\small\item\em creates the F\+B\+Os \end{DoxyCompactList}\item 
+void \textbf{ draw\+Scene\+Geometry} (ngl\+::\+V\+A\+O\+Primitives $\ast$\+\_\+prim)
+\begin{DoxyCompactList}\small\item\em draw the objects in the scene \end{DoxyCompactList}\item 
+void \textbf{ draw\+Screen\+Oriented\+Plane} (G\+Luint \+\_\+pid, ngl\+::\+V\+A\+O\+Primitives $\ast$\+\_\+prim)
+\begin{DoxyCompactList}\small\item\em draw a screen-\/oriented plane \end{DoxyCompactList}\item 
+void \textbf{ render\+Text} ()
+\begin{DoxyCompactList}\small\item\em draw text over the screen (glitches the screen every now and then, so not currently used) \end{DoxyCompactList}\item 
+void \textbf{ key\+Press\+Event} (Q\+Key\+Event $\ast$\+\_\+event) override
+\begin{DoxyCompactList}\small\item\em Qt Event called when a key is pressed. \end{DoxyCompactList}\item 
+void \textbf{ key\+Release\+Event} (Q\+Key\+Event $\ast$\+\_\+event) override
+\begin{DoxyCompactList}\small\item\em Qt Event called when a key is released. \end{DoxyCompactList}\item 
+void \textbf{ mouse\+Move\+Event} (Q\+Mouse\+Event $\ast$\+\_\+event) override
+\begin{DoxyCompactList}\small\item\em this method is called every time a mouse is moved \end{DoxyCompactList}\item 
+void \textbf{ mouse\+Press\+Event} (Q\+Mouse\+Event $\ast$\+\_\+event) override
+\begin{DoxyCompactList}\small\item\em this method is called everytime the mouse button is pressed inherited from Q\+Object and overridden here. \end{DoxyCompactList}\item 
+void \textbf{ mouse\+Release\+Event} (Q\+Mouse\+Event $\ast$\+\_\+event) override
+\begin{DoxyCompactList}\small\item\em this method is called everytime the mouse button is released inherited from Q\+Object and overridden here. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Q\+Time \textbf{ m\+\_\+time}
+\begin{DoxyCompactList}\small\item\em a Q\+Time object used for tracking the framerate \end{DoxyCompactList}\item 
+int \textbf{ m\+\_\+delta\+Time}
+\begin{DoxyCompactList}\small\item\em elapsed time since the last frame \end{DoxyCompactList}\item 
+int \textbf{ m\+\_\+framerate}
+\begin{DoxyCompactList}\small\item\em the current framerate \end{DoxyCompactList}\item 
+bool \textbf{ m\+\_\+start} = true
+\begin{DoxyCompactList}\small\item\em a flag indicating whether this is the first frame \end{DoxyCompactList}\item 
+bool \textbf{ m\+\_\+\+T\+AA} = true
+\begin{DoxyCompactList}\small\item\em T\+AA subroutine flag. \end{DoxyCompactList}\item 
+bool \textbf{ m\+\_\+sub\+Nbr\+Clamp} = true
+\begin{DoxyCompactList}\small\item\em Neighborhood clamping subroutine flag. \end{DoxyCompactList}\item 
+bool \textbf{ m\+\_\+sub\+Reproject} = true
+\begin{DoxyCompactList}\small\item\em Reprojection subroutine flag. \end{DoxyCompactList}\item 
+\textbf{ Camera} \textbf{ m\+\_\+cam}
+\begin{DoxyCompactList}\small\item\em the virtual camera of the scene \end{DoxyCompactList}\item 
+\textbf{ Jitter} \textbf{ m\+\_\+jitter}
+\begin{DoxyCompactList}\small\item\em the jitter struct of the scene \end{DoxyCompactList}\item 
+ngl\+::\+Mat4 \textbf{ m\+\_\+view}
+\begin{DoxyCompactList}\small\item\em the view matrix for camera \end{DoxyCompactList}\item 
+ngl\+::\+Mat4 \textbf{ m\+\_\+view\+Prev}
+\begin{DoxyCompactList}\small\item\em the view matrix for camera of the previous frame \end{DoxyCompactList}\item 
+ngl\+::\+Mat4 \textbf{ m\+\_\+projection}
+\begin{DoxyCompactList}\small\item\em the projection matrix for camera \end{DoxyCompactList}\item 
+bool \textbf{ m\+\_\+transform\+Light} =false
+\item 
+ngl\+::\+Vec4 \textbf{ m\+\_\+light\+Pos}
+\item 
+std\+::unique\+\_\+ptr$<$ ngl\+::\+Obj $>$ \textbf{ m\+\_\+mesh\+Street}
+\begin{DoxyCompactList}\small\item\em street model \end{DoxyCompactList}\item 
+std\+::unique\+\_\+ptr$<$ ngl\+::\+Obj $>$ \textbf{ m\+\_\+mesh\+Ground}
+\begin{DoxyCompactList}\small\item\em street ground model \end{DoxyCompactList}\item 
+std\+::unique\+\_\+ptr$<$ ngl\+::\+Obj $>$ \textbf{ m\+\_\+mesh\+Walls}
+\begin{DoxyCompactList}\small\item\em street large walls model \end{DoxyCompactList}\item 
+std\+::unique\+\_\+ptr$<$ ngl\+::\+Obj $>$ \textbf{ m\+\_\+mesh\+Fence}
+\begin{DoxyCompactList}\small\item\em fence model (error on load, so not currently used) \end{DoxyCompactList}\item 
+G\+Luint \textbf{ m\+\_\+brick\+Texture}
+\begin{DoxyCompactList}\small\item\em id for the scene\textquotesingle{}s brick texture \end{DoxyCompactList}\item 
+G\+Luint \textbf{ m\+\_\+fbo\+Tex\+Id} [3]
+\begin{DoxyCompactList}\small\item\em ids for the color attachments used by the F\+B\+Os. (two for the history ping pongs, one for the current frame, and one for the current frame with M\+S\+AA) \end{DoxyCompactList}\item 
+G\+Luint \textbf{ m\+\_\+fbo\+Depth\+Id}
+\begin{DoxyCompactList}\small\item\em ids for the depth attachments used by the current frame fbo \end{DoxyCompactList}\item 
+int \textbf{ m\+\_\+ping}
+\begin{DoxyCompactList}\small\item\em an index that alternates between 0 and 1 to help ping pong texture locations and fbos \end{DoxyCompactList}\item 
+G\+Luint \textbf{ m\+\_\+fbo\+Id} [3]
+\begin{DoxyCompactList}\small\item\em our F\+BO I\+Ds used by the F\+B\+Os \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class inherits from the Qt Open\+G\+L\+Window and draws the scene with the T\+AA shader before passing the result to the screen. 
+
+Definition at line 19 of file Scene.\+h.
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\label{class_scene_ad10176d75a9cc0da56626f682d083507}} 
+\index{Scene@{Scene}!Scene@{Scene}}
+\index{Scene@{Scene}!Scene@{Scene}}
+\subsubsection{Scene()}
+{\footnotesize\ttfamily Scene\+::\+Scene (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+ctor for our N\+GL drawing class 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em parent} & the parent window to the class \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 14 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a9990bde99d4f00742ed4de308bf194ae}} 
+\index{Scene@{Scene}!````~Scene@{$\sim$Scene}}
+\index{````~Scene@{$\sim$Scene}!Scene@{Scene}}
+\subsubsection{$\sim$Scene()}
+{\footnotesize\ttfamily Scene\+::$\sim$\+Scene (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+dtor must close down ngl and release Open\+GL resources 
+
+
+
+Definition at line 20 of file Scene.\+cpp.
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\label{class_scene_aaa91c996597f3da3cb1ca2c1d6bb2159}} 
+\index{Scene@{Scene}!createFramebufferObject@{createFramebufferObject}}
+\index{createFramebufferObject@{createFramebufferObject}!Scene@{Scene}}
+\subsubsection{createFramebufferObject()}
+{\footnotesize\ttfamily void Scene\+::create\+Framebuffer\+Object (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+creates the F\+B\+Os 
+
+
+
+Definition at line 334 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_afbd8f3791139915e8a3e966459ce22c9}} 
+\index{Scene@{Scene}!createTextureObjects@{createTextureObjects}}
+\index{createTextureObjects@{createTextureObjects}!Scene@{Scene}}
+\subsubsection{createTextureObjects()}
+{\footnotesize\ttfamily void Scene\+::create\+Texture\+Objects (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+creates the texture objects for the F\+B\+Os 
+
+
+
+Definition at line 259 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a42339c24522a2e9f1822e3b67627200c}} 
+\index{Scene@{Scene}!drawSceneGeometry@{drawSceneGeometry}}
+\index{drawSceneGeometry@{drawSceneGeometry}!Scene@{Scene}}
+\subsubsection{drawSceneGeometry()}
+{\footnotesize\ttfamily void Scene\+::draw\+Scene\+Geometry (\begin{DoxyParamCaption}\item[{ngl\+::\+V\+A\+O\+Primitives $\ast$}]{\+\_\+prim }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+draw the objects in the scene 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em passes} & an instance of the N\+GL primitives to draw primitive geometry from the N\+GL library \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 189 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a98bfe8f456d957f352cd835d25c172fc}} 
+\index{Scene@{Scene}!drawScreenOrientedPlane@{drawScreenOrientedPlane}}
+\index{drawScreenOrientedPlane@{drawScreenOrientedPlane}!Scene@{Scene}}
+\subsubsection{drawScreenOrientedPlane()}
+{\footnotesize\ttfamily void Scene\+::draw\+Screen\+Oriented\+Plane (\begin{DoxyParamCaption}\item[{G\+Luint}]{\+\_\+pid,  }\item[{ngl\+::\+V\+A\+O\+Primitives $\ast$}]{\+\_\+prim }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+draw a screen-\/oriented plane 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em passes} & an instance of the shader handler as well as N\+GL primitives \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 249 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a0342c4d5793669ee7498a75c13026880}} 
+\index{Scene@{Scene}!initializeGL@{initializeGL}}
+\index{initializeGL@{initializeGL}!Scene@{Scene}}
+\subsubsection{initializeGL()}
+{\footnotesize\ttfamily void Scene\+::initialize\+GL (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+the initialize class is called once when the window is created and we have a valid GL context use this to setup any default GL stuff 
+
+
+
+Definition at line 34 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a5d59a1d3162e89478fd3f4d54efdee01}} 
+\index{Scene@{Scene}!keyPressEvent@{keyPressEvent}}
+\index{keyPressEvent@{keyPressEvent}!Scene@{Scene}}
+\subsubsection{keyPressEvent()}
+{\footnotesize\ttfamily void Scene\+::key\+Press\+Event (\begin{DoxyParamCaption}\item[{Q\+Key\+Event $\ast$}]{\+\_\+event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}}
+
+
+
+Qt Event called when a key is pressed. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+event} & the Qt event to query for size etc \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 100 of file Mouse\+Key\+Events.\+cpp.
+
+\mbox{\label{class_scene_a38c25ace44976c7c4f107eedab295620}} 
+\index{Scene@{Scene}!keyReleaseEvent@{keyReleaseEvent}}
+\index{keyReleaseEvent@{keyReleaseEvent}!Scene@{Scene}}
+\subsubsection{keyReleaseEvent()}
+{\footnotesize\ttfamily void Scene\+::key\+Release\+Event (\begin{DoxyParamCaption}\item[{Q\+Key\+Event $\ast$}]{\+\_\+event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}}
+
+
+
+Qt Event called when a key is released. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em \+\_\+event} & the Qt event to query for size etc \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 179 of file Mouse\+Key\+Events.\+cpp.
+
+\mbox{\label{class_scene_a9c8fdf926d7c46139162845d535115aa}} 
+\index{Scene@{Scene}!loadMatricesToShader@{loadMatricesToShader}}
+\index{loadMatricesToShader@{loadMatricesToShader}!Scene@{Scene}}
+\subsubsection{loadMatricesToShader()}
+{\footnotesize\ttfamily void Scene\+::load\+Matrices\+To\+Shader (\begin{DoxyParamCaption}\item[{const char $\ast$}]{shader\+Name,  }\item[{ngl\+::\+Mat4}]{\+\_\+M }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+method to load transform matrices to the shader, originally by Jon Macey, modified 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em takes} & in the name of the shader shader\+Name to draw the object with as well as its model matrix \+\_\+M \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 139 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_ad06c38ba83cadd6f72dc2aceb69e4873}} 
+\index{Scene@{Scene}!loadTexture@{loadTexture}}
+\index{loadTexture@{loadTexture}!Scene@{Scene}}
+\subsubsection{loadTexture()}
+{\footnotesize\ttfamily void Scene\+::load\+Texture (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+method to load a texture from file, code by Jon Macey 
+
+
+
+Definition at line 167 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a3d619d31300bb8deca8803b925c85baa}} 
+\index{Scene@{Scene}!mouseMoveEvent@{mouseMoveEvent}}
+\index{mouseMoveEvent@{mouseMoveEvent}!Scene@{Scene}}
+\subsubsection{mouseMoveEvent()}
+{\footnotesize\ttfamily void Scene\+::mouse\+Move\+Event (\begin{DoxyParamCaption}\item[{Q\+Mouse\+Event $\ast$}]{\+\_\+event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}}
+
+
+
+this method is called every time a mouse is moved 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & the Qt Event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 9 of file Mouse\+Key\+Events.\+cpp.
+
+\mbox{\label{class_scene_abbdfcf09ecb09960220697d723d28bc8}} 
+\index{Scene@{Scene}!mousePressEvent@{mousePressEvent}}
+\index{mousePressEvent@{mousePressEvent}!Scene@{Scene}}
+\subsubsection{mousePressEvent()}
+{\footnotesize\ttfamily void Scene\+::mouse\+Press\+Event (\begin{DoxyParamCaption}\item[{Q\+Mouse\+Event $\ast$}]{\+\_\+event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}}
+
+
+
+this method is called everytime the mouse button is pressed inherited from Q\+Object and overridden here. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & the Qt Event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 63 of file Mouse\+Key\+Events.\+cpp.
+
+\mbox{\label{class_scene_ae6979da5a735ac7df4eb3dd50418e704}} 
+\index{Scene@{Scene}!mouseReleaseEvent@{mouseReleaseEvent}}
+\index{mouseReleaseEvent@{mouseReleaseEvent}!Scene@{Scene}}
+\subsubsection{mouseReleaseEvent()}
+{\footnotesize\ttfamily void Scene\+::mouse\+Release\+Event (\begin{DoxyParamCaption}\item[{Q\+Mouse\+Event $\ast$}]{\+\_\+event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [private]}}
+
+
+
+this method is called everytime the mouse button is released inherited from Q\+Object and overridden here. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em \+\_\+event} & the Qt Event structure \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 84 of file Mouse\+Key\+Events.\+cpp.
+
+\mbox{\label{class_scene_ab0c23a9c2bb68b75465b4fddcb7975a5}} 
+\index{Scene@{Scene}!paintGL@{paintGL}}
+\index{paintGL@{paintGL}!Scene@{Scene}}
+\subsubsection{paintGL()}
+{\footnotesize\ttfamily void Scene\+::paint\+GL (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}}
+
+
+
+this is called everytime we want to draw the scene 
+
+
+
+Definition at line 381 of file Scene.\+cpp.
+
+\mbox{\label{class_scene_a07d7afcdb3f6f87730a9e3b2df60f96b}} 
+\index{Scene@{Scene}!renderText@{renderText}}
+\index{renderText@{renderText}!Scene@{Scene}}
+\subsubsection{renderText()}
+{\footnotesize\ttfamily void Scene\+::render\+Text (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+draw text over the screen (glitches the screen every now and then, so not currently used) 
+
+
+
+Definition at line 372 of file Scene.\+cpp.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\label{class_scene_afd486c4c65677d09a9172a9d11c9e2f1}} 
+\index{Scene@{Scene}!m\_brickTexture@{m\_brickTexture}}
+\index{m\_brickTexture@{m\_brickTexture}!Scene@{Scene}}
+\subsubsection{m\_brickTexture}
+{\footnotesize\ttfamily G\+Luint Scene\+::m\+\_\+brick\+Texture\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+id for the scene\textquotesingle{}s brick texture 
+
+
+
+Definition at line 121 of file Scene.\+h.
+
+\mbox{\label{class_scene_a20b9149e7bf4cca143cb6ec10b9e5e6c}} 
+\index{Scene@{Scene}!m\_cam@{m\_cam}}
+\index{m\_cam@{m\_cam}!Scene@{Scene}}
+\subsubsection{m\_cam}
+{\footnotesize\ttfamily \textbf{ Camera} Scene\+::m\+\_\+cam\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the virtual camera of the scene 
+
+
+
+Definition at line 74 of file Scene.\+h.
+
+\mbox{\label{class_scene_a989db66b95ac58d99e56633fae15747e}} 
+\index{Scene@{Scene}!m\_deltaTime@{m\_deltaTime}}
+\index{m\_deltaTime@{m\_deltaTime}!Scene@{Scene}}
+\subsubsection{m\_deltaTime}
+{\footnotesize\ttfamily int Scene\+::m\+\_\+delta\+Time\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+elapsed time since the last frame 
+
+
+
+Definition at line 50 of file Scene.\+h.
+
+\mbox{\label{class_scene_ade6eac31a2459bb2ec3141aff8cbcc85}} 
+\index{Scene@{Scene}!m\_fboDepthId@{m\_fboDepthId}}
+\index{m\_fboDepthId@{m\_fboDepthId}!Scene@{Scene}}
+\subsubsection{m\_fboDepthId}
+{\footnotesize\ttfamily G\+Luint Scene\+::m\+\_\+fbo\+Depth\+Id\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+ids for the depth attachments used by the current frame fbo 
+
+
+
+Definition at line 130 of file Scene.\+h.
+
+\mbox{\label{class_scene_ab7cbfa0dc91be7d39b2302ecf87df8ef}} 
+\index{Scene@{Scene}!m\_fboId@{m\_fboId}}
+\index{m\_fboId@{m\_fboId}!Scene@{Scene}}
+\subsubsection{m\_fboId}
+{\footnotesize\ttfamily G\+Luint Scene\+::m\+\_\+fbo\+Id[3]\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+our F\+BO I\+Ds used by the F\+B\+Os 
+
+
+
+Definition at line 138 of file Scene.\+h.
+
+\mbox{\label{class_scene_a0eac2bf381d0a09fa6ba766c3f3ef92b}} 
+\index{Scene@{Scene}!m\_fboTexId@{m\_fboTexId}}
+\index{m\_fboTexId@{m\_fboTexId}!Scene@{Scene}}
+\subsubsection{m\_fboTexId}
+{\footnotesize\ttfamily G\+Luint Scene\+::m\+\_\+fbo\+Tex\+Id[3]\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+ids for the color attachments used by the F\+B\+Os. (two for the history ping pongs, one for the current frame, and one for the current frame with M\+S\+AA) 
+
+
+
+Definition at line 126 of file Scene.\+h.
+
+\mbox{\label{class_scene_ad82be519467005242025df684e14b80a}} 
+\index{Scene@{Scene}!m\_framerate@{m\_framerate}}
+\index{m\_framerate@{m\_framerate}!Scene@{Scene}}
+\subsubsection{m\_framerate}
+{\footnotesize\ttfamily int Scene\+::m\+\_\+framerate\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the current framerate 
+
+
+
+Definition at line 54 of file Scene.\+h.
+
+\mbox{\label{class_scene_a8e05a1cb0e6364f893fe942e3d3d6b5b}} 
+\index{Scene@{Scene}!m\_jitter@{m\_jitter}}
+\index{m\_jitter@{m\_jitter}!Scene@{Scene}}
+\subsubsection{m\_jitter}
+{\footnotesize\ttfamily \textbf{ Jitter} Scene\+::m\+\_\+jitter\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the jitter struct of the scene 
+
+
+
+Definition at line 78 of file Scene.\+h.
+
+\mbox{\label{class_scene_afd9dcd01ae1bd959bc1c06ead8b8f026}} 
+\index{Scene@{Scene}!m\_lightPos@{m\_lightPos}}
+\index{m\_lightPos@{m\_lightPos}!Scene@{Scene}}
+\subsubsection{m\_lightPos}
+{\footnotesize\ttfamily ngl\+::\+Vec4 Scene\+::m\+\_\+light\+Pos\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 92 of file Scene.\+h.
+
+\mbox{\label{class_scene_a5d30505b09ef62949d514735dcfda0f1}} 
+\index{Scene@{Scene}!m\_meshFence@{m\_meshFence}}
+\index{m\_meshFence@{m\_meshFence}!Scene@{Scene}}
+\subsubsection{m\_meshFence}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ngl\+::\+Obj$>$ Scene\+::m\+\_\+mesh\+Fence\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+fence model (error on load, so not currently used) 
+
+
+
+Definition at line 117 of file Scene.\+h.
+
+\mbox{\label{class_scene_ad62796048dade134b09c522e55fe2d15}} 
+\index{Scene@{Scene}!m\_meshGround@{m\_meshGround}}
+\index{m\_meshGround@{m\_meshGround}!Scene@{Scene}}
+\subsubsection{m\_meshGround}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ngl\+::\+Obj$>$ Scene\+::m\+\_\+mesh\+Ground\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+street ground model 
+
+
+
+Definition at line 109 of file Scene.\+h.
+
+\mbox{\label{class_scene_a04589652baceed417d3270e9053190d6}} 
+\index{Scene@{Scene}!m\_meshStreet@{m\_meshStreet}}
+\index{m\_meshStreet@{m\_meshStreet}!Scene@{Scene}}
+\subsubsection{m\_meshStreet}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ngl\+::\+Obj$>$ Scene\+::m\+\_\+mesh\+Street\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+street model 
+
+
+
+Definition at line 105 of file Scene.\+h.
+
+\mbox{\label{class_scene_a2665d0d47e82013373dffc9699294e1c}} 
+\index{Scene@{Scene}!m\_meshWalls@{m\_meshWalls}}
+\index{m\_meshWalls@{m\_meshWalls}!Scene@{Scene}}
+\subsubsection{m\_meshWalls}
+{\footnotesize\ttfamily std\+::unique\+\_\+ptr$<$ngl\+::\+Obj$>$ Scene\+::m\+\_\+mesh\+Walls\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+street large walls model 
+
+
+
+Definition at line 113 of file Scene.\+h.
+
+\mbox{\label{class_scene_a7bfca8639e9dfe479c1e93b75cd682c2}} 
+\index{Scene@{Scene}!m\_ping@{m\_ping}}
+\index{m\_ping@{m\_ping}!Scene@{Scene}}
+\subsubsection{m\_ping}
+{\footnotesize\ttfamily int Scene\+::m\+\_\+ping\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+an index that alternates between 0 and 1 to help ping pong texture locations and fbos 
+
+
+
+Definition at line 134 of file Scene.\+h.
+
+\mbox{\label{class_scene_a610be5a7a01276caef3c3413f5f68fe6}} 
+\index{Scene@{Scene}!m\_projection@{m\_projection}}
+\index{m\_projection@{m\_projection}!Scene@{Scene}}
+\subsubsection{m\_projection}
+{\footnotesize\ttfamily ngl\+::\+Mat4 Scene\+::m\+\_\+projection\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the projection matrix for camera 
+
+
+
+Definition at line 90 of file Scene.\+h.
+
+\mbox{\label{class_scene_a5eb7172685e4b529af8e14eccfa23e82}} 
+\index{Scene@{Scene}!m\_start@{m\_start}}
+\index{m\_start@{m\_start}!Scene@{Scene}}
+\subsubsection{m\_start}
+{\footnotesize\ttfamily bool Scene\+::m\+\_\+start = true\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+a flag indicating whether this is the first frame 
+
+
+
+Definition at line 58 of file Scene.\+h.
+
+\mbox{\label{class_scene_a3e80402d9342d3bddd6a0a9d5a365e0a}} 
+\index{Scene@{Scene}!m\_subNbrClamp@{m\_subNbrClamp}}
+\index{m\_subNbrClamp@{m\_subNbrClamp}!Scene@{Scene}}
+\subsubsection{m\_subNbrClamp}
+{\footnotesize\ttfamily bool Scene\+::m\+\_\+sub\+Nbr\+Clamp = true\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Neighborhood clamping subroutine flag. 
+
+
+
+Definition at line 66 of file Scene.\+h.
+
+\mbox{\label{class_scene_a0b9afb303085e85f55651ec1cf13eab7}} 
+\index{Scene@{Scene}!m\_subReproject@{m\_subReproject}}
+\index{m\_subReproject@{m\_subReproject}!Scene@{Scene}}
+\subsubsection{m\_subReproject}
+{\footnotesize\ttfamily bool Scene\+::m\+\_\+sub\+Reproject = true\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Reprojection subroutine flag. 
+
+
+
+Definition at line 70 of file Scene.\+h.
+
+\mbox{\label{class_scene_afde29e90e164cbfe7b4364d8981629ad}} 
+\index{Scene@{Scene}!m\_TAA@{m\_TAA}}
+\index{m\_TAA@{m\_TAA}!Scene@{Scene}}
+\subsubsection{m\_TAA}
+{\footnotesize\ttfamily bool Scene\+::m\+\_\+\+T\+AA = true\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+T\+AA subroutine flag. 
+
+
+
+Definition at line 62 of file Scene.\+h.
+
+\mbox{\label{class_scene_a616401e5e3bab5b6a757190a50fb66cc}} 
+\index{Scene@{Scene}!m\_time@{m\_time}}
+\index{m\_time@{m\_time}!Scene@{Scene}}
+\subsubsection{m\_time}
+{\footnotesize\ttfamily Q\+Time Scene\+::m\+\_\+time\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+a Q\+Time object used for tracking the framerate 
+
+
+
+Definition at line 46 of file Scene.\+h.
+
+\mbox{\label{class_scene_a50b268e97820bd18ac07f5e14378561e}} 
+\index{Scene@{Scene}!m\_transformLight@{m\_transformLight}}
+\index{m\_transformLight@{m\_transformLight}!Scene@{Scene}}
+\subsubsection{m\_transformLight}
+{\footnotesize\ttfamily bool Scene\+::m\+\_\+transform\+Light =false\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+Definition at line 91 of file Scene.\+h.
+
+\mbox{\label{class_scene_a6e6d6f0dab5600f0d16ceedbb4ea5c29}} 
+\index{Scene@{Scene}!m\_view@{m\_view}}
+\index{m\_view@{m\_view}!Scene@{Scene}}
+\subsubsection{m\_view}
+{\footnotesize\ttfamily ngl\+::\+Mat4 Scene\+::m\+\_\+view\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the view matrix for camera 
+
+
+
+Definition at line 82 of file Scene.\+h.
+
+\mbox{\label{class_scene_a339de74eaa7314e454ccd17e1a626f57}} 
+\index{Scene@{Scene}!m\_viewPrev@{m\_viewPrev}}
+\index{m\_viewPrev@{m\_viewPrev}!Scene@{Scene}}
+\subsubsection{m\_viewPrev}
+{\footnotesize\ttfamily ngl\+::\+Mat4 Scene\+::m\+\_\+view\+Prev\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+the view matrix for camera of the previous frame 
+
+
+
+Definition at line 86 of file Scene.\+h.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/include/\textbf{ Scene.\+h}\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/src/\textbf{ Mouse\+Key\+Events.\+cpp}\item 
+/home/emma/\+Documents/\+Masterclass/\+Demo/src/\textbf{ Scene.\+cpp}\end{DoxyCompactItemize}

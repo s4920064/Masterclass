@@ -1,0 +1,107 @@
+\@ifundefined {etoctocstyle}{\let \etoc@startlocaltoc \@gobble \let \etoc@settocdepth \@gobble \let \etoc@depthtag \@gobble \let \etoc@setlocaltop \@gobble }{}
+\contentsline {chapter}{\numberline {1}Masterclass}{1}
+\contentsline {chapter}{\numberline {2}Hierarchical Index}{3}
+\contentsline {section}{\numberline {2.1}Class Hierarchy}{3}
+\contentsline {chapter}{\numberline {3}Class Index}{5}
+\contentsline {section}{\numberline {3.1}Class List}{5}
+\contentsline {chapter}{\numberline {4}File Index}{7}
+\contentsline {section}{\numberline {4.1}File List}{7}
+\contentsline {chapter}{\numberline {5}Class Documentation}{9}
+\contentsline {section}{\numberline {5.1}Camera Struct Reference}{9}
+\contentsline {subsection}{\numberline {5.1.1}Detailed Description}{10}
+\contentsline {subsection}{\numberline {5.1.2}Member Data Documentation}{10}
+\contentsline {subsubsection}{\numberline {5.1.2.1}cursor}{10}
+\contentsline {subsubsection}{\numberline {5.1.2.2}cursorX}{10}
+\contentsline {subsubsection}{\numberline {5.1.2.3}cursorY}{10}
+\contentsline {subsubsection}{\numberline {5.1.2.4}front}{11}
+\contentsline {subsubsection}{\numberline {5.1.2.5}pitch}{11}
+\contentsline {subsubsection}{\numberline {5.1.2.6}pos}{11}
+\contentsline {subsubsection}{\numberline {5.1.2.7}rotate}{11}
+\contentsline {subsubsection}{\numberline {5.1.2.8}translateB}{11}
+\contentsline {subsubsection}{\numberline {5.1.2.9}translateF}{12}
+\contentsline {subsubsection}{\numberline {5.1.2.10}translateL}{12}
+\contentsline {subsubsection}{\numberline {5.1.2.11}translateR}{12}
+\contentsline {subsubsection}{\numberline {5.1.2.12}up}{12}
+\contentsline {subsubsection}{\numberline {5.1.2.13}yaw}{12}
+\contentsline {subsubsection}{\numberline {5.1.2.14}zoom}{13}
+\contentsline {subsubsection}{\numberline {5.1.2.15}zoomScale}{13}
+\contentsline {subsubsection}{\numberline {5.1.2.16}zoomSize}{13}
+\contentsline {subsubsection}{\numberline {5.1.2.17}zoomSquare}{13}
+\contentsline {section}{\numberline {5.2}Jitter Class Reference}{13}
+\contentsline {subsection}{\numberline {5.2.1}Detailed Description}{14}
+\contentsline {subsection}{\numberline {5.2.2}Constructor \& Destructor Documentation}{14}
+\contentsline {subsubsection}{\numberline {5.2.2.1}Jitter()}{14}
+\contentsline {subsubsection}{\numberline {5.2.2.2}$\sim $Jitter()}{15}
+\contentsline {subsection}{\numberline {5.2.3}Member Function Documentation}{15}
+\contentsline {subsubsection}{\numberline {5.2.3.1}getMatrix()}{15}
+\contentsline {subsubsection}{\numberline {5.2.3.2}getOffset()}{15}
+\contentsline {subsubsection}{\numberline {5.2.3.3}make2x()}{15}
+\contentsline {subsubsection}{\numberline {5.2.3.4}makeQuincunx()}{15}
+\contentsline {subsubsection}{\numberline {5.2.3.5}updateCycle()}{16}
+\contentsline {subsection}{\numberline {5.2.4}Member Data Documentation}{16}
+\contentsline {subsubsection}{\numberline {5.2.4.1}m\_cycle}{16}
+\contentsline {subsubsection}{\numberline {5.2.4.2}m\_matrix}{16}
+\contentsline {subsubsection}{\numberline {5.2.4.3}m\_offset}{16}
+\contentsline {section}{\numberline {5.3}Scene Class Reference}{17}
+\contentsline {subsection}{\numberline {5.3.1}Detailed Description}{19}
+\contentsline {subsection}{\numberline {5.3.2}Constructor \& Destructor Documentation}{19}
+\contentsline {subsubsection}{\numberline {5.3.2.1}Scene()}{19}
+\contentsline {subsubsection}{\numberline {5.3.2.2}$\sim $Scene()}{19}
+\contentsline {subsection}{\numberline {5.3.3}Member Function Documentation}{19}
+\contentsline {subsubsection}{\numberline {5.3.3.1}createFramebufferObject()}{19}
+\contentsline {subsubsection}{\numberline {5.3.3.2}createTextureObjects()}{20}
+\contentsline {subsubsection}{\numberline {5.3.3.3}drawSceneGeometry()}{20}
+\contentsline {subsubsection}{\numberline {5.3.3.4}drawScreenOrientedPlane()}{20}
+\contentsline {subsubsection}{\numberline {5.3.3.5}initializeGL()}{20}
+\contentsline {subsubsection}{\numberline {5.3.3.6}keyPressEvent()}{21}
+\contentsline {subsubsection}{\numberline {5.3.3.7}keyReleaseEvent()}{21}
+\contentsline {subsubsection}{\numberline {5.3.3.8}loadMatricesToShader()}{21}
+\contentsline {subsubsection}{\numberline {5.3.3.9}loadTexture()}{21}
+\contentsline {subsubsection}{\numberline {5.3.3.10}mouseMoveEvent()}{22}
+\contentsline {subsubsection}{\numberline {5.3.3.11}mousePressEvent()}{22}
+\contentsline {subsubsection}{\numberline {5.3.3.12}mouseReleaseEvent()}{22}
+\contentsline {subsubsection}{\numberline {5.3.3.13}paintGL()}{23}
+\contentsline {subsubsection}{\numberline {5.3.3.14}renderText()}{23}
+\contentsline {subsection}{\numberline {5.3.4}Member Data Documentation}{23}
+\contentsline {subsubsection}{\numberline {5.3.4.1}m\_brickTexture}{23}
+\contentsline {subsubsection}{\numberline {5.3.4.2}m\_cam}{23}
+\contentsline {subsubsection}{\numberline {5.3.4.3}m\_deltaTime}{24}
+\contentsline {subsubsection}{\numberline {5.3.4.4}m\_fboDepthId}{24}
+\contentsline {subsubsection}{\numberline {5.3.4.5}m\_fboId}{24}
+\contentsline {subsubsection}{\numberline {5.3.4.6}m\_fboTexId}{24}
+\contentsline {subsubsection}{\numberline {5.3.4.7}m\_framerate}{24}
+\contentsline {subsubsection}{\numberline {5.3.4.8}m\_jitter}{25}
+\contentsline {subsubsection}{\numberline {5.3.4.9}m\_lightPos}{25}
+\contentsline {subsubsection}{\numberline {5.3.4.10}m\_meshFence}{25}
+\contentsline {subsubsection}{\numberline {5.3.4.11}m\_meshGround}{25}
+\contentsline {subsubsection}{\numberline {5.3.4.12}m\_meshStreet}{25}
+\contentsline {subsubsection}{\numberline {5.3.4.13}m\_meshWalls}{26}
+\contentsline {subsubsection}{\numberline {5.3.4.14}m\_ping}{26}
+\contentsline {subsubsection}{\numberline {5.3.4.15}m\_projection}{26}
+\contentsline {subsubsection}{\numberline {5.3.4.16}m\_start}{26}
+\contentsline {subsubsection}{\numberline {5.3.4.17}m\_subNbrClamp}{26}
+\contentsline {subsubsection}{\numberline {5.3.4.18}m\_subReproject}{27}
+\contentsline {subsubsection}{\numberline {5.3.4.19}m\_TAA}{27}
+\contentsline {subsubsection}{\numberline {5.3.4.20}m\_time}{27}
+\contentsline {subsubsection}{\numberline {5.3.4.21}m\_transformLight}{27}
+\contentsline {subsubsection}{\numberline {5.3.4.22}m\_view}{27}
+\contentsline {subsubsection}{\numberline {5.3.4.23}m\_viewPrev}{27}
+\contentsline {chapter}{\numberline {6}File Documentation}{29}
+\contentsline {section}{\numberline {6.1}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/include/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Camera.h File Reference}{29}
+\contentsline {subsection}{\numberline {6.1.1}Detailed Description}{29}
+\contentsline {subsection}{\numberline {6.1.2}Variable Documentation}{29}
+\contentsline {subsubsection}{\numberline {6.1.2.1}SENSITIVITY}{30}
+\contentsline {subsubsection}{\numberline {6.1.2.2}SPEED}{30}
+\contentsline {section}{\numberline {6.2}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/include/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Jitter.h File Reference}{30}
+\contentsline {subsection}{\numberline {6.2.1}Detailed Description}{30}
+\contentsline {section}{\numberline {6.3}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/include/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Scene.h File Reference}{30}
+\contentsline {subsection}{\numberline {6.3.1}Variable Documentation}{31}
+\contentsline {subsubsection}{\numberline {6.3.1.1}TEXTURE\_HEIGHT}{31}
+\contentsline {subsubsection}{\numberline {6.3.1.2}TEXTURE\_WIDTH}{31}
+\contentsline {section}{\numberline {6.4}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}R\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}E\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}A\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}D\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}ME.md File Reference}{31}
+\contentsline {section}{\numberline {6.5}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/src/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Jitter.cpp File Reference}{31}
+\contentsline {section}{\numberline {6.6}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/src/main.cpp File Reference}{32}
+\contentsline {subsection}{\numberline {6.6.1}Function Documentation}{32}
+\contentsline {subsubsection}{\numberline {6.6.1.1}main()}{32}
+\contentsline {section}{\numberline {6.7}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/src/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Mouse\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Key\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Events.cpp File Reference}{32}
+\contentsline {section}{\numberline {6.8}/home/emma/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Documents/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Masterclass/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Demo/src/\discretionary {\unhbox \voidb@x \hbox {\relax \fontsize {7}{8}\selectfont $\leftarrow \joinrel \rhook $}}{}{}Scene.cpp File Reference}{32}
