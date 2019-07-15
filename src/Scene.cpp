@@ -397,7 +397,7 @@ void Scene::paintGL()
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]); // always fbo[2]
 
   // clear the current rendering target
-  glClearColor(0.2f,0.5f,0.8f,1.0f);
+  glClearColor(0.633f,0.668f,0.832f,1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 

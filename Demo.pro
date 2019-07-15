@@ -16,13 +16,14 @@ MOC_DIR=moc
 # on a mac we don't create a .app bundle file ( for ease of multiplatform use)
 CONFIG-=app_bundle
 # Auto include all .cpp files in the project src directory (can specifiy individually if required)
-SOURCES+= \ #$$PWD/src/*.cpp
+SOURCES+= $$PWD/src/*.cpp \
           $$PWD/src/Scene.cpp    \
           $$PWD/src/MouseKeyEvents.cpp \
           $$PWD/src/Jitter.cpp \
           $$PWD/src/main.cpp
 # same for the .h files
-HEADERS+= $$PWD/include/Scene.h \
+HEADERS+= $$PWD/src/*.cpp \
+          $$PWD/include/Scene.h \
           $$PWD/include/Camera.h \
           $$PWD/include/Jitter.h
 # and add the include dir into the search path for Qt and make
@@ -32,6 +33,7 @@ DESTDIR=./
 # add the glsl shader files
 OTHER_FILES+= shaders/*.glsl  \
               README.md \
+              geo/* \
               SimpleNGL.py
 # were are going to default to a console app
 CONFIG += console
