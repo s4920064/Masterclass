@@ -159,4 +159,3 @@ void main()
     fragColour = blendFactor*currColour+(1-blendFactor)*prevColour;
   }
 }
-

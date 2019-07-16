@@ -91,21 +91,21 @@ void Scene::initializeGL()
   shader->setUniform("lightColor",400.0f,400.0f,400.0f);
   shader->setUniform("exposure",2.2f);
   //shader->setUniform("albedo",0.950f, 0.71f, 0.29f);
-  shader->setUniform("albedo",0.950f, 0.71f, 0.29f);
+  //shader->setUniform("albedo",0.950f, 0.71f, 0.29f);
   shader->setUniform("metallic",1.02f);
   shader->setUniform("roughness",0.38f);
   shader->setUniform("ao",0.2f);
   shader->printRegisteredUniforms("PBR");
 
-  // set shading parameters for the Checker shader
-  shader->use(ngl::nglCheckerShader);
-  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
-  shader->setUniform("checkOn",true);
-  shader->setUniform("lightPos",m_lightPos.toVec3());
-  shader->setUniform("colour1",0.9f,0.9f,0.9f,1.0f);
-  shader->setUniform("colour2",0.6f,0.6f,0.6f,1.0f);
-  shader->setUniform("checkSize",60.0f);
-  shader->printRegisteredUniforms(ngl::nglCheckerShader);
+//  // set shading parameters for the Checker shader
+//  shader->use(ngl::nglCheckerShader);
+//  shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+//  shader->setUniform("checkOn",true);
+//  shader->setUniform("lightPos",m_lightPos.toVec3());
+//  shader->setUniform("colour1",0.9f,0.9f,0.9f,1.0f);
+//  shader->setUniform("colour2",0.6f,0.6f,0.6f,1.0f);
+//  shader->setUniform("checkSize",60.0f);
+//  shader->printRegisteredUniforms(ngl::nglCheckerShader);
 
   // create a mesh from an obj passing in the obj file and texture
   m_meshStreet.reset(  new ngl::Obj("geo/street.obj"));
@@ -156,6 +156,7 @@ void Scene::loadMatricesToShader(const char* _shaderName, ngl::Mat4 _M)
   shader->setUniform("MVP", MVP);
   shader->setUniform("normalMatrix", normalMatrix);
   shader->setUniform("V", m_view);
+  shader->setUniform("M", _M);
 
   if(m_transformLight)
   {
@@ -218,20 +219,20 @@ void Scene::drawSceneGeometry(ngl::VAOPrimitives* _prim)
   // make a model matrix
   ngl::Mat4 M;
 
-  // teapot
-  // update model matrix for teapot
-  M = ngl::Mat4(1.0f);
-  M.translate(0.0f,0.45f,0.0f);
-  // send the matrices to PBR shader
-  loadMatricesToShader("PBR", M);
-  // draw
-  _prim->draw("teapot");
-  // reset the model matrix for the other objects
-  M = ngl::Mat4(1.0f);
+//  // teapot
+//  // update model matrix for teapot
+//  M = ngl::Mat4(1.0f);
+//  M.translate(0.0f,0.45f,0.0f);
+//  // send the matrices to PBR shader
+//  loadMatricesToShader("PBR", M);
+//  // draw
+//  _prim->draw("teapot");
+//  // reset the model matrix for the other objects
+//  M = ngl::Mat4(1.0f);
 
   glBindTexture(GL_TEXTURE_2D,m_brickTexture);
 
-  loadMatricesToShader(ngl::nglCheckerShader,M);
+  loadMatricesToShader("PBR",M);
   m_meshStreet->draw();
 
   loadMatricesToShader("Texture",M);
@@ -369,6 +370,64 @@ void Scene::createFramebufferObject()
   }
 }
 
+void Scene::initEnvironment()
+{
+  // Enable seamless cube mapping
+  glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+  // Placing our environment map texture in texture unit 0
+  glActiveTexture (GL_TEXTURE0);
+
+  // Generate storage and a reference for our environment map texture
+  glGenTextures (1, &m_envTex);
+
+  // Bind this texture to the active texture unit
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_envTex);
+
+  // Now load up the sides of the cube
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, "textures/sky_zneg.png");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, "textures/sky_zpos.png");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, "textures/sky_ypos.png");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, "textures/sky_yneg.png");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, "textures/sky_xneg.png");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X, "textures/sky_xpos.png");
+
+  // Generate mipmap levels
+  glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+  // Set the texture parameters for the cube map
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  GLfloat anisotropy;
+  glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &anisotropy);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+
+  // Set our cube map texture to on the shader so we can use it
+  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
+  shader->use("PBR");
+  shader->setUniform("envMap", 0);
+}
+
+void Scene::initEnvironmentSide(GLenum target, const char *filename) {
+    // Load up the image using NGL routine
+    ngl::Image img(filename);
+
+    // Transfer image data onto the GPU using the teximage2D call
+    glTexImage2D (
+      target,           // The target (in this case, which side of the cube)
+      0,                // Level of mipmap to load
+      img.format(),     // Internal format (number of colour components)
+      img.width(),      // Width in pixels
+      img.height(),     // Height in pixels
+      0,                // Border
+      GL_RGBA,          // Format of the pixel data
+      GL_UNSIGNED_BYTE, // Data type of pixel data
+      img.getPixels()   // Pointer to image data in memory
+    );
+}
+
 void Scene::renderText()
 {
   // set up our QPainter object
@@ -397,7 +456,7 @@ void Scene::paintGL()
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboId[2]); // always fbo[2]
 
   // clear the current rendering target
-  glClearColor(0.633f,0.668f,0.832f,1.0f);
+  glClearColor(0.2f,0.5f,0.8f,1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
 
