@@ -84,17 +84,6 @@ void Scene::initializeGL()
   // set shading parameters for the PBR shader
   ( *shader )[ "PBR" ]->use();
   shader->setUniform( "camPos", m_cam.pos );
-  // now a light
-  m_lightPos.set( 0.0, 2.0f, 2.0f ,1.0f);
-  // setup the default shader material and light porerties
-  shader->setUniform("lightPosition",m_lightPos.toVec3());
-  shader->setUniform("lightColor",400.0f,400.0f,400.0f);
-  shader->setUniform("exposure",2.2f);
-  //shader->setUniform("albedo",0.950f, 0.71f, 0.29f);
-  //shader->setUniform("albedo",0.950f, 0.71f, 0.29f);
-  shader->setUniform("metallic",1.02f);
-  shader->setUniform("roughness",0.38f);
-  shader->setUniform("ao",0.2f);
   shader->printRegisteredUniforms("PBR");
 
 //  // set shading parameters for the Checker shader
@@ -128,6 +117,8 @@ void Scene::initializeGL()
 //  m_meshFence->createVAO();
 
   // create the fbos and their texture attach
+
+  initEnvironment();
   createTextureObjects();
   createFramebufferObject();
   loadTexture();
@@ -157,11 +148,6 @@ void Scene::loadMatricesToShader(const char* _shaderName, ngl::Mat4 _M)
   shader->setUniform("normalMatrix", normalMatrix);
   shader->setUniform("V", m_view);
   shader->setUniform("M", _M);
-
-  if(m_transformLight)
-  {
-    shader->setUniform("lightPosition",(m_lightPos).toVec3());
-  }
 }
 
 // function from jon Macey
@@ -407,7 +393,7 @@ void Scene::initEnvironment()
   // Set our cube map texture to on the shader so we can use it
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   shader->use("PBR");
-  shader->setUniform("envMap", 0);
+  shader->setUniform("envTex", 0);
 }
 
 void Scene::initEnvironmentSide(GLenum target, const char *filename) {

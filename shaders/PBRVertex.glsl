@@ -13,6 +13,9 @@ smooth out vec3 WSVertexPos;
 smooth out vec3 WSVertexNormal;
 smooth out vec2 WSTexCoord;
 
+out vec3 VertexNormal;
+out vec3 VertexPosition;
+
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
@@ -20,12 +23,15 @@ uniform mat3 normalMatrix;
 
 void main()
 {
+  VertexPosition = inVert;
+  VertexNormal = normalMatrix*inNormal;
+
   // Copy across the texture coordinates
   WSTexCoord = inUV;
 
   VSVertexPos = vec3(V * vec4(inVert, 1.0f));
   WSVertexNormal = normalize(mat3(normalMatrix)*inNormal);
-  vec4 worldPos = M*vec4(inVert,1.0);
+  vec4 worldPos = V*M*vec4(inVert,1.0);
   WSVertexPos = worldPos.xyz;
   gl_Position = MVP*vec4(inVert,1.0);
 }

@@ -1,72 +1,106 @@
-#version 330 core
+#version 420 core
 #extension GL_NV_shadow_samplers_cube : enable
 
 // This code is based on code from here https://learnopengl.com/#!PBR/Lighting
 layout (location =0) out vec4 fragColour;
+
+// Inputs
 
 smooth in vec3 VSVertexPos;
 smooth in vec3 WSVertexPos;
 smooth in vec3 WSVertexNormal;
 smooth in vec2 WSTexCoord;
 
-// material parameters
-//uniform vec3 albedo;
-uniform float metallic;
-uniform float roughness;
-uniform float ao;
+in vec3 VertexPosition;
+in vec3 VertexNormal;
 
-// lights
-uniform vec3 lightPosition;
-uniform vec3 lightColor;
+// Uniforms
 
 uniform vec3 camPos;
-uniform float exposure=2.2;
+uniform samplerCube envTex;
 
-// A texture unit for storing the 3D texture
-uniform samplerCube envMap;
+//Structs
+//------------------------------------------------------------------------------------------------------------
+struct LightInfo {
+    vec4 Position; // Light position in eye coords.
+    vec3 La; // Ambient light intensity
+    vec3 Ld; // Diffuse light intensity
+    vec3 Ls; // Specular light intensity
+};
 
-const float PI = 3.14159265359;
-// ----------------------------------------------------------------------------
-float distributionGGX(vec3 N, vec3 H, float roughness)
+struct MaterialInfo {
+    vec3 Ka; // Ambient reflectivity
+    vec3 Kd; // Diffuse reflectivity
+    vec3 Ks; // Specular reflectivity
+    float Shininess; // Specular shininess factor
+};
+
+//Reflection Models
+//------------------------------------------------------------------------------------------------------------
+
+vec3 fresnel(vec3 N, vec3 E, float ior, vec3 diffuse, float metallic)
 {
-    float a = roughness*roughness;
-    float a2 = a*a;
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH*NdotH;
-
-    float nom   = a2;
-    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-    denom = PI * denom * denom;
-
-    return nom / denom;
+  float cosTheta = max(dot(N,E),0.0f);
+  vec3 F0=vec3(ior);
+  F0 = mix (F0 , diffuse, metallic);
+  return F0 + (1.0f - F0) * pow(1.0f - cosTheta, 5.0f);
 }
-// ----------------------------------------------------------------------------
-float geometrySchlickGGX(float NdotV, float roughness)
+
+
+//GGX Distribution
+//Based on: http://www.codinglabs.net/article_physically_based_rendering_cook_torrance.aspx
+//          and
+//          https://learnopengl.com/PBR/Lighting
+
+float GGXDistribution(vec3 n , vec3 h, float roughness)
+{
+
+  float a  = roughness * roughness;
+  float a2 = a*a;
+  float NH = max(dot(n,h),0.0);
+  float NH2 = NH*NH;
+
+  float num = a2;
+  float denom = (NH2 * (a2-1.0) + 1.0);
+  denom = 3.14 * denom * denom;
+  return num / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = (roughness + 1.0);
     float k = (r*r) / 8.0;
 
-    float nom   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
+    float numerator = NdotV;
+    float denominator = NdotV * (1.0 - k) + k;
 
-    return nom / denom;
+    return numerator / denominator;
 }
-// ----------------------------------------------------------------------------
-float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-    float NdotV = max(dot(N, V), 0.0);
-    float NdotL = max(dot(N, L), 0.0);
-    float ggx2 = geometrySchlickGGX(NdotV, roughness);
-    float ggx1 = geometrySchlickGGX(NdotL, roughness);
 
-    return ggx1 * ggx2;
-}
-// ----------------------------------------------------------------------------
-vec3 fresnelSchlick(float cosTheta, vec3 F0)
+//Cook Torrance BRDF using the GGX Distribution
+//Based on: https://github.com/glslify/glsl-specular-cook-torrance/blob/master/index.glsl
+vec3 cookTorrance(vec3 l, vec3 v, vec3 n, vec3 h, float roughness, vec3 fresnel)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+  float pi = 3.14159;
+
+  float VN = max(dot(v,n),0.0f);
+  float LN = max(dot(l,n),0.0f);
+  float NH = max(dot(n,h),0.0f);
+  float VH = max(dot(v,h),0.0f);
+
+
+  float X = 2.0 * NH/LN;
+  float G = GeometrySchlickGGX(VN,roughness);
+  //float G = GeometrySmith(n,v,l,roughness);
+  float D = GGXDistribution(n,h,roughness);
+  //float F = pow(1.0 - VN, fresnel);
+  vec3 F = fresnel;
+
+
+  float denominator = 4.0 * max(VN,0.0f) * max(LN,0.0f);
+  return G*F*D / max(denominator, 0.0001);
 }
-// ----------------------------------------------------------------------------
+
 vec3 checker(vec2 _uv)
 {
   vec3 colour1 = vec3(0.9f,0.9f,0.9f);
@@ -80,85 +114,71 @@ vec3 checker(vec2 _uv)
      return colour1;
 }
 
+//Instances
+//------------------------------------------------------------------------------------------------------------
+
+LightInfo Light = LightInfo(
+            vec4(1.0, 10.0, 10.0, 1.0),   // position
+            vec3(1.0, 1.0, 1.0),        // La - ambient
+            vec3(1.0, 1.0, 1.0),        // Ld - diffuse
+            vec3(1.0, 1.0, 1.0)         // Ls - specular
+            );
+
+MaterialInfo Material = MaterialInfo(
+            vec3(0.2, 0.2, 0.2),    // Ka - ambient
+            vec3(0.3, 0.3, 0.3),    // Kd - diffuse
+            vec3(1.0,1.0,1.0),    // Ks - specular
+            10.0                    // Shininess
+            );
 
 void main()
 {
-  // the uv coordinates of the object being drawn
+  // Pi
+  float pi = 3.14159;
+
+  // UV coords
   vec2 uv = WSTexCoord;
-  vec2 c_uv = uv;
 
-  // surface color
-  vec3 albedo = checker(uv);
+  // vertex normal and position relative to the object
+  vec3 vertPos = normalize(VertexPosition);
+  vec3 vertNorm = normalize(VertexNormal);
 
-  // normal vector
+  // world space normal
   vec3 N = normalize(WSVertexNormal);
-  // view vector
-  vec3 V = normalize(camPos - VSVertexPos);
-  // reflectance vector
-  vec3 R = reflect(-V, N);
+  // light incident vector
+  vec3 Li = normalize(Light.Position.xyz - WSVertexPos);
+  // world space view vector
+  vec3 V = normalize(-WSVertexPos);
+  // world space half vector
+  vec3 H = normalize(V + Light.Position.xyz);
+  // up vector
+  vec3 Up = vec3(0.0f,0.0f,1.0f);
 
-  // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
-  // of 0.04 and if it's a metal, use their albedo color as F0 (metallic workflow)
-  vec3 F0 = vec3(0.04);
-  F0 = mix(F0, albedo, metallic);
+  // Struct replacements
+  // Light diffuse
+  vec3 LightLd = textureLod(envTex, reflect(-V,N),5).rgb;
+  // Material diffuse
+  vec3 MaterialKd = checker(uv);
 
-  // outgoing light
-  vec3 Lo = vec3(0.0);
+  // Diffuse
+  vec3 Diffuse = LightLd * dot(Light.Position.xyz,N) * MaterialKd;
 
-  // calculate per-light radiance
-
-  // incident light ray
-  vec3 L = normalize(lightPosition - VSVertexPos);
-  // as a cubemap
-  //vec3 L = textureCube(envMap, R);
-
-  vec3 H = normalize(V + L);
-  //vec3 H = normalize(L);
-
-  // radiance from light source
-  float distance = length(lightPosition - VSVertexPos);
-  float attenuation = 1.0 / (distance * distance);
-  vec3 radiance = lightColor * attenuation;
-
-  // Cook-Torrance BRDF
-  // Normal distribution function - orientation of microfacets
-  float NDF = distributionGGX(N, H, roughness);
-  // Geometry function - attenuation of light due to microfacets
-  float G   = geometrySmith(N, V, L, roughness);
-  // Fresnel
-  vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
-
-  vec3 nominator    = NDF * G * F;
-  float denominator = 4 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0) + 0.001; // 0.001 to prevent divide by zero.
-  vec3 brdf = nominator / denominator;
-
-  // kS is equal to Fresnel
-  vec3 kS = F;
-  // for energy conservation, the diffuse and specular light can't
-  // be above 1.0 (unless the surface emits light); to preserve this
-  // relationship the diffuse component (kD) should equal 1.0 - kS.
-  vec3 kD = vec3(1.0) - kS;
-  // multiply kD by the inverse metalness such that only non-metals
-  // have diffuse lighting, or a linear blend if partly metal (pure metals
-  // have no diffuse light).
-  kD *= 1.0 - metallic;
-
-  // scale light by NdotL
-  float NdotL = max(dot(N, L), 0.0);
-
-  // add to outgoing radiance Lo
-  Lo += (kD * albedo / PI + brdf) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+  // surface properties
+  float roughness = 0.7;
+  float metallic = 0;
+  float IOR = 0.2;
 
 
-  vec3 ambient = vec3(0.03) * albedo * ao;
+  // BRDF
+  vec3 Fresnel = fresnel(N,V,IOR,Diffuse,metallic);
+  vec3 Ambient = Light.La * Material.Ka;
+  vec3 Specular = Light.Ls * Material.Ks * max(cookTorrance(Li,V,N,H,roughness,Fresnel),0.1);
+  vec3 BRDF = Diffuse/pi;
 
-  vec3 color = ambient + Lo;
+  // the rendering equation - output light
+  //vec3 Lo = BRDF * Li * dot(N,V);
+  vec3 Lo = Diffuse;//+Ambient+Specular;
 
-  // HDR tonemapping
-  color = color / (color + vec3(1.0));
-  // gamma correct
-  color = pow(color, vec3(1.0/exposure));
-  vec3 colortest = vec3(0.5,1.0,0.5);
-
-  fragColour = vec4(color, 1.0);
+  // output color
+  fragColour = vec4(Lo,1.0f);
 }
