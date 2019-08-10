@@ -119,9 +119,9 @@ vec3 checker(vec2 _uv)
 
 LightInfo Light = LightInfo(
             vec4(1.0, 10.0, 10.0, 1.0),   // position
-            vec3(1.0, 1.0, 1.0),        // La - ambient
+            vec3(0.2, 0.2, 0.2),        // La - ambient
             vec3(1.0, 1.0, 1.0),        // Ld - diffuse
-            vec3(1.0, 1.0, 1.0)         // Ls - specular
+            vec3(0.2, 0.2, 0.2)         // Ls - specular
             );
 
 MaterialInfo Material = MaterialInfo(
@@ -146,7 +146,7 @@ void main()
   // world space normal
   vec3 N = normalize(WSVertexNormal);
   // light incident vector
-  vec3 Li = normalize(Light.Position.xyz - WSVertexPos);
+  vec3 wi = normalize(Light.Position.xyz - WSVertexPos);
   // world space view vector
   vec3 V = normalize(-WSVertexPos);
   // world space half vector
@@ -154,30 +154,30 @@ void main()
   // up vector
   vec3 Up = vec3(0.0f,0.0f,1.0f);
 
-  // Struct replacements
-  // Light diffuse
-  vec3 LightLd = textureLod(envTex, reflect(-V,N),5).rgb;
+  // Light irradiance
+  vec3 Li = textureLod(envTex, reflect(-V,N),5).rgb;
   // Material diffuse
   vec3 MaterialKd = checker(uv);
 
   // Diffuse
-  vec3 Diffuse = LightLd * dot(Light.Position.xyz,N) * MaterialKd;
+  vec3 Diffuse = wi * dot(Light.Position.xyz,N) * MaterialKd;
 
   // surface properties
   float roughness = 0.7;
   float metallic = 0;
   float IOR = 0.2;
 
-
-  // BRDF
+  // Lambert BRDF
+  vec3 BRDF_Lam = MaterialKd/pi;
+  // Cook-Torrance BRDF
   vec3 Fresnel = fresnel(N,V,IOR,Diffuse,metallic);
   vec3 Ambient = Light.La * Material.Ka;
-  vec3 Specular = Light.Ls * Material.Ks * max(cookTorrance(Li,V,N,H,roughness,Fresnel),0.1);
-  vec3 BRDF = Diffuse/pi;
+  vec3 Specular = Light.Ls * Material.Ks * max(cookTorrance(wi,V,N,H,roughness,Fresnel),0.1);
+  vec3 BRDF_CT = MaterialKd*BRDF_Lam;
 
   // the rendering equation - output light
-  //vec3 Lo = BRDF * Li * dot(N,V);
-  vec3 Lo = Diffuse;//+Ambient+Specular;
+  vec3 Lo = BRDF_Lam /* Li */ *Li* dot(N,V);
+  //vec3 Lo = Diffuse+Ambient+Specular;
 
   // output color
   fragColour = vec4(Lo,1.0f);

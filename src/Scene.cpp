@@ -371,12 +371,19 @@ void Scene::initEnvironment()
   glBindTexture(GL_TEXTURE_CUBE_MAP, m_envTex);
 
   // Now load up the sides of the cube
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, "textures/sky_zneg.png");
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, "textures/sky_zpos.png");
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, "textures/sky_ypos.png");
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, "textures/sky_yneg.png");
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, "textures/sky_xneg.png");
-  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X, "textures/sky_xpos.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, "textures/sky_zneg.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, "textures/sky_zpos.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, "textures/sky_ypos.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, "textures/sky_yneg.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, "textures/sky_xneg.png");
+//  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X, "textures/sky_xpos.png");
+
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, "textures/yoko_zneg.jpg");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, "textures/yoko_zpos.jpg");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, "textures/yoko_ypos.jpg");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, "textures/yoko_yneg.jpg");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, "textures/yoko_xneg.jpg");
+  initEnvironmentSide(GL_TEXTURE_CUBE_MAP_POSITIVE_X, "textures/yoko_xpos.jpg");
 
   // Generate mipmap levels
   glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
